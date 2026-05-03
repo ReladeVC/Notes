@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Apple Notes Dark — полностью зашифрованный блокнот</title>
+    <title>VC Notes — защищённый блокнот с шифрованием</title>
     <style>
         * {
             margin: 0;
@@ -59,7 +59,7 @@
 
         .logo-area p {
             font-size: 11px;
-            color: #8E8E93;
+            color: #0A84FF;
             font-weight: 500;
         }
 
@@ -120,6 +120,29 @@
             font-weight: 500;
             color: #0A84FF;
             white-space: nowrap;
+        }
+
+        .backup-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .small-link {
+            background: rgba(120, 120, 128, 0.18);
+            border: none;
+            padding: 6px 14px;
+            border-radius: 24px;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .small-link:hover {
+            background: rgba(120, 120, 128, 0.3);
         }
 
         .main-split {
@@ -306,14 +329,21 @@
             gap: 12px;
         }
 
-        .small-link {
-            background: none;
-            border: none;
-            color: #0A84FF;
-            font-size: 11px;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 12px;
+        /* Анимация для сообщений */
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+                visibility: hidden;
+            }
         }
 
         .notes-scroll::-webkit-scrollbar {
@@ -330,16 +360,17 @@
             border-radius: 4px;
         }
 
-        @media (max-width: 750px) {
+        @media (max-width: 850px) {
             .sidebar { width: 260px; }
             .auth-compact input { width: 110px; }
             .editor-title-input { font-size: 18px; }
+            .backup-buttons { order: 3; width: 100%; justify-content: center; margin-top: 8px; }
         }
 
-        @media (max-width: 650px) {
-            .auth-compact { width: 100%; justify-content: space-between; }
+        @media (max-width: 750px) {
             .navbar { flex-direction: column; align-items: stretch; }
             .security-badge { text-align: center; }
+            .auth-compact { justify-content: center; }
         }
     </style>
 </head>
@@ -347,14 +378,18 @@
 <div class="app-container">
     <div class="navbar">
         <div class="logo-area">
-            <h1>📓 Apple Notes Dark</h1>
-            <p>Полностью зашифрованный</p>
+            <h1>📓 VC Notes</h1>
+            <p>🔒 AES-GCM 256</p>
         </div>
         <div class="auth-compact">
             <input type="text" id="userIdInput" placeholder="Ваш ID" autocomplete="username" style="width:140px">
             <input type="password" id="masterPassInput" placeholder="Пароль" autocomplete="current-password" style="width:140px">
             <button id="authLoginBtn">Разблокировать</button>
             <button id="authLogoutBtn" class="outline">Выйти</button>
+            <div class="backup-buttons">
+                <button id="exportAllNotesBtn" class="small-link">🔒 Экспорт</button>
+                <button id="importBackupBtn" class="small-link">📥 Импорт</button>
+            </div>
         </div>
         <div class="security-badge" id="globalAuthBadge">🔒 Не авторизован</div>
     </div>
@@ -362,7 +397,7 @@
     <div class="main-split">
         <div class="sidebar">
             <div class="sidebar-header">
-                <div id="authInfoMsg" style="font-size: 11px; color:#8E8E93; text-align:center; margin-bottom: 8px;"></div>
+                <div id="authInfoMsg" style="font-size: 11px; color:#8E8E93; text-align:center; margin-bottom: 8px; min-height: 32px;"></div>
                 <div class="notes-list-header">
                     <h3>Все заметки</h3>
                     <button id="createNewNoteBtn" class="new-note-btn" title="Новая заметка">+</button>
@@ -370,11 +405,6 @@
             </div>
             <div class="notes-scroll" id="notesListContainer">
                 <div style="padding: 24px; text-align:center; color:#8E8E93;">🔐 Авторизуйтесь</div>
-            </div>
-            <div style="padding: 12px; font-size:11px; text-align:center; border-top: 0.5px solid rgba(84,84,88,0.3); display: flex; gap: 8px; justify-content: center;">
-                <button id="exportAllNotesBtn" class="small-link">🔒 Экспорт (зашифр.)</button>
-                <button id="importBackupBtn" class="small-link">🔓 Импорт бэкапа</button>
-                <input type="file" id="importBackupFile" accept=".json,.enc" style="display: none;">
             </div>
         </div>
 
@@ -390,7 +420,6 @@
             <div class="bottom-status">
                 <span id="editorStatusMsg">● Ничего не выбрано</span>
                 <div class="bottom-actions">
-                    <span>🔒 AES-GCM 256</span>
                 </div>
             </div>
         </div>
@@ -398,6 +427,61 @@
 </div>
 
 <script>
+    // ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ СООБЩЕНИЙ С АВТО-ИСЧЕЗНОВЕНИЕМ ==========
+    let messageTimeout = null;
+    
+    function showMessage(element, text, isError = false, duration = 10000) {
+        // Очищаем предыдущий таймер
+        if (messageTimeout) {
+            clearTimeout(messageTimeout);
+        }
+        
+        // Убираем предыдущую анимацию
+        element.classList.remove('fade-out');
+        
+        // Устанавливаем текст и цвет
+        element.textContent = text;
+        element.style.color = isError ? '#FF453A' : '#0A84FF';
+        element.style.opacity = '1';
+        element.style.visibility = 'visible';
+        
+        // Устанавливаем таймер на исчезновение
+        messageTimeout = setTimeout(() => {
+            element.classList.add('fade-out');
+            // После анимации очищаем текст
+            setTimeout(() => {
+                if (element.classList.contains('fade-out')) {
+                    element.textContent = '';
+                    element.style.color = '#8E8E93';
+                    element.classList.remove('fade-out');
+                }
+            }, 500);
+        }, duration);
+    }
+    
+    function showStatusMessage(element, text, duration = 10000) {
+        if (messageTimeout) {
+            clearTimeout(messageTimeout);
+        }
+        
+        element.classList.remove('fade-out');
+        element.textContent = text;
+        element.style.color = '#8E8E93';
+        element.style.opacity = '1';
+        element.style.visibility = 'visible';
+        
+        messageTimeout = setTimeout(() => {
+            element.classList.add('fade-out');
+            setTimeout(() => {
+                if (element.classList.contains('fade-out')) {
+                    element.textContent = '● Ничего не выбрано';
+                    element.style.color = '#8E8E93';
+                    element.classList.remove('fade-out');
+                }
+            }, 500);
+        }, duration);
+    }
+
     // ========== КРИПТОГРАФИЧЕСКОЕ ЯДРО ==========
     async function deriveKey(password, salt) {
         const enc = new TextEncoder();
@@ -411,7 +495,6 @@
         );
     }
 
-    // Шифрование любых данных (объект -> зашифрованная base64)
     async function encryptData(plainObject, password) {
         const plainJson = JSON.stringify(plainObject);
         const encoder = new TextEncoder();
@@ -426,7 +509,6 @@
         return btoa(String.fromCharCode(...combined));
     }
 
-    // Расшифровка (зашифрованная base64 -> объект)
     async function decryptData(encryptedBase64, password) {
         const combined = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
         const salt = combined.slice(0, 16);
@@ -443,7 +525,7 @@
     }
 
     // ========== ХРАНИЛИЩЕ В LOCALSTORAGE ==========
-    const STORAGE_PREFIX = "apple_secure_notes_v4";
+    const STORAGE_PREFIX = "vc_secure_notes_v1";
 
     function getStorageKey(userId) {
         return `${STORAGE_PREFIX}_${userId}`;
@@ -482,7 +564,6 @@
     const globalAuthBadge = document.getElementById('globalAuthBadge');
     const exportAllNotesBtn = document.getElementById('exportAllNotesBtn');
     const importBackupBtn = document.getElementById('importBackupBtn');
-    const importBackupFile = document.getElementById('importBackupFile');
 
     async function refreshUI() {
         if (!currentUserId || !currentPassword) {
@@ -500,7 +581,7 @@
             if (!notesData.notes) notesData.notes = {};
             if (!notesData.nextId) notesData.nextId = 1;
         } catch (err) {
-            authInfoMsg.innerText = `Ошибка: ${err.message}`;
+            showMessage(authInfoMsg, `❌ ${err.message}`, true);
             notesListContainer.innerHTML = `<div style="padding:20px;color:#FF453A;">❌ Неверный пароль</div>`;
             return;
         }
@@ -553,19 +634,18 @@
         if (!note) return;
         noteTitleEditor.value = note.title || '';
         noteBodyEditor.value = note.body || '';
-        editorStatusMsg.innerText = `✏️ Редактирование: ${note.title || 'без названия'}`;
-        renderNotesList();
+        // Не показываем сообщение о редактировании
     }
 
     async function saveCurrentNote() {
         if (!currentUserId || !currentPassword) {
-            authInfoMsg.innerText = 'Авторизуйтесь';
+            showMessage(authInfoMsg, '❌ Авторизуйтесь перед сохранением', true);
             return;
         }
         const title = noteTitleEditor.value.trim();
         const body = noteBodyEditor.value;
         if (!title && !body) {
-            editorStatusMsg.innerText = '⚠️ Нельзя сохранить пустую заметку';
+            showStatusMessage(editorStatusMsg, '⚠️ Нельзя сохранить пустую заметку', 3000);
             return;
         }
         let noteId = currentNoteId;
@@ -586,10 +666,10 @@
         currentNoteId = noteId;
         try {
             await saveEncryptedNotesCollection(currentUserId, currentPassword, { notes: notesData.notes, nextId: notesData.nextId });
-            editorStatusMsg.innerText = '✅ Сохранено и зашифровано';
+            showStatusMessage(editorStatusMsg, '✅ Сохранено и зашифровано', 3000);
             await refreshUI();
         } catch (err) {
-            authInfoMsg.innerText = `Ошибка: ${err.message}`;
+            showMessage(authInfoMsg, `❌ Ошибка: ${err.message}`, true);
         }
     }
 
@@ -602,28 +682,28 @@
         try {
             await saveEncryptedNotesCollection(currentUserId, currentPassword, { notes: notesData.notes, nextId: notesData.nextId });
             await refreshUI();
-            editorStatusMsg.innerText = currentNoteId ? 'Заметка удалена' : 'Все заметки удалены';
+            showStatusMessage(editorStatusMsg, currentNoteId ? '🗑 Заметка удалена' : '📭 Все заметки удалены', 3000);
         } catch (err) {
-            authInfoMsg.innerText = `Ошибка: ${err.message}`;
+            showMessage(authInfoMsg, `❌ Ошибка: ${err.message}`, true);
         }
     }
 
     async function createNewNote() {
         if (!currentUserId || !currentPassword) {
-            authInfoMsg.innerText = "Сначала выполните вход";
+            showMessage(authInfoMsg, '❌ Сначала выполните вход', true);
             return;
         }
         currentNoteId = null;
         noteTitleEditor.value = '';
         noteBodyEditor.value = '';
-        editorStatusMsg.innerText = '✏️ Новая заметка (нажмите Сохранить)';
+        showStatusMessage(editorStatusMsg, '✏️ Новая заметка (нажмите Сохранить)', 3000);
     }
 
     async function login() {
         const userId = userIdInput.value.trim();
         const password = masterPassInput.value;
         if (!userId || !password) {
-            authInfoMsg.innerText = 'Введите ID и пароль';
+            showMessage(authInfoMsg, '❌ Введите ID и пароль', true);
             return;
         }
         currentUserId = userId;
@@ -634,11 +714,12 @@
             if (!notesData.notes) notesData.notes = {};
             if (!notesData.nextId) notesData.nextId = 1;
             await refreshUI();
-            authInfoMsg.innerText = `✅ Доступ открыт. Заметок: ${Object.keys(notesData.notes).length}`;
+            const count = Object.keys(notesData.notes).length;
+            showMessage(authInfoMsg, `✅ Доступ открыт. Заметок: ${count}`, false);
         } catch (err) {
             currentUserId = null;
             currentPassword = null;
-            authInfoMsg.innerText = `❌ Ошибка: ${err.message}`;
+            showMessage(authInfoMsg, `❌ Ошибка: ${err.message}`, true);
             refreshUI();
         }
     }
@@ -651,50 +732,44 @@
         userIdInput.value = '';
         masterPassInput.value = '';
         refreshUI();
-        authInfoMsg.innerText = 'Вы вышли';
+        showMessage(authInfoMsg, '🔓 Вы вышли из системы', false);
     }
 
-    // ========== ИСПРАВЛЕННЫЙ ЭКСПОРТ (100% ШИФРОВАНИЕ) ==========
     async function exportAllBackup() {
         if (!currentUserId || !currentPassword) { 
-            authInfoMsg.innerText = 'Авторизуйтесь перед экспортом'; 
+            showMessage(authInfoMsg, '❌ Авторизуйтесь перед экспортом', true);
             return; 
         }
         
         try {
-            // Загружаем текущие заметки
             const currentNotes = await loadEncryptedNotesCollection(currentUserId, currentPassword);
             
-            // СОЗДАЁМ ЗАШИФРОВАННЫЙ БЭКАП
-            // Бэкап содержит: версию, userId, зашифрованные данные, timestamp
             const backupObject = {
-                version: "apple_notes_encrypted_v2",
+                version: "vc_notes_encrypted_v1",
                 userId: currentUserId,
-                encryptedData: await encryptData(currentNotes, currentPassword), // <- ШИФРУЕМ!
+                encryptedData: await encryptData(currentNotes, currentPassword),
                 exportedAt: Date.now(),
                 hint: "Этот файл зашифрован. Для восстановления нужен тот же пароль."
             };
             
-            // Сохраняем как JSON (но содержимое encryptedData уже зашифровано)
             const jsonStr = JSON.stringify(backupObject, null, 2);
             const blob = new Blob([jsonStr], {type: "application/json"});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `apple_notes_encrypted_${currentUserId}_${Date.now()}.backup.json`;
+            a.download = `vc_notes_${currentUserId}_${Date.now()}.backup.json`;
             a.click();
             URL.revokeObjectURL(a.href);
-            authInfoMsg.innerText = '✅ Бэкап создан и зашифрован!';
+            showMessage(authInfoMsg, '✅ Бэкап создан и зашифрован!', false);
         } catch(e) { 
-            authInfoMsg.innerText = `Ошибка экспорта: ${e.message}`; 
+            showMessage(authInfoMsg, `❌ Ошибка экспорта: ${e.message}`, true);
             console.error(e);
         }
     }
 
-    // ========== ИСПРАВЛЕННЫЙ ИМПОРТ (РАСШИФРОВКА БЭКАПА) ==========
     async function importBackup(file) {
         if (!file) return;
         if (!currentUserId || !currentPassword) { 
-            authInfoMsg.innerText = 'Авторизуйтесь перед импортом'; 
+            showMessage(authInfoMsg, '❌ Авторизуйтесь перед импортом', true);
             return; 
         }
         
@@ -702,44 +777,39 @@
             const text = await file.text();
             const imported = JSON.parse(text);
             
-            // Проверка версии бэкапа
-            if (imported.version !== "apple_notes_encrypted_v2") {
-                authInfoMsg.innerText = '❌ Неподдерживаемый формат бэкапа';
+            if (imported.version !== "vc_notes_encrypted_v1") {
+                showMessage(authInfoMsg, '❌ Неподдерживаемый формат бэкапа', true);
                 return;
             }
             
-            // Проверка соответствия пользователя
             if (imported.userId !== currentUserId) {
-                authInfoMsg.innerText = `❌ ID не совпадает (файл: ${imported.userId}, текущий: ${currentUserId})`;
+                showMessage(authInfoMsg, `❌ ID не совпадает (файл: ${imported.userId}, текущий: ${currentUserId})`, true);
                 return;
             }
             
-            // РАСШИФРОВЫВАЕМ данные бэкапа
             const decryptedNotes = await decryptData(imported.encryptedData, currentPassword);
             
-            // Проверяем структуру
             if (!decryptedNotes || typeof decryptedNotes !== 'object') {
                 throw new Error('Неверная структура данных');
             }
             
-            // Восстанавливаем заметки
             notesData = decryptedNotes;
             if (!notesData.notes) notesData.notes = {};
             if (!notesData.nextId) notesData.nextId = 1;
             
-            // Сохраняем в localStorage
             await saveEncryptedNotesCollection(currentUserId, currentPassword, { notes: notesData.notes, nextId: notesData.nextId });
             
             await refreshUI();
-            authInfoMsg.innerText = `✅ Импорт успешен! Загружено ${Object.keys(notesData.notes).length} заметок.`;
-            editorStatusMsg.innerText = '📥 Бэкап восстановлен';
+            const count = Object.keys(notesData.notes).length;
+            showMessage(authInfoMsg, `✅ Импорт успешен! Загружено ${count} заметок.`, false);
+            showStatusMessage(editorStatusMsg, '📥 Бэкап восстановлен', 3000);
             
         } catch(e) { 
             let errorMsg = e.message;
             if (errorMsg.includes("Неверный пароль") || errorMsg.includes("decrypt")) {
                 errorMsg = "Неверный пароль для этого бэкапа";
             }
-            authInfoMsg.innerText = `❌ Ошибка импорта: ${errorMsg}`; 
+            showMessage(authInfoMsg, `❌ Ошибка импорта: ${errorMsg}`, true);
         }
     }
 
@@ -759,11 +829,19 @@
     saveCurrentNoteBtn.addEventListener('click', saveCurrentNote);
     deleteCurrentNoteBtn.addEventListener('click', deleteCurrentNote);
     exportAllNotesBtn.addEventListener('click', exportAllBackup);
-    importBackupBtn.addEventListener('click', () => importBackupFile.click());
-    importBackupFile.addEventListener('change', (e) => { 
+    
+    // Создаём input для импорта
+    const importFileInput = document.createElement('input');
+    importFileInput.type = 'file';
+    importFileInput.accept = '.json';
+    importFileInput.style.display = 'none';
+    importFileInput.addEventListener('change', (e) => { 
         if(e.target.files[0]) importBackup(e.target.files[0]); 
-        importBackupFile.value = ''; 
+        importFileInput.value = ''; 
     });
+    document.body.appendChild(importFileInput);
+    
+    importBackupBtn.onclick = () => importFileInput.click();
 
     refreshUI();
 </script>
