@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Apple Notes — защищённый блокнот с шифрованием</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #E8ECF0 0%, #D4DCE3 100%);
+            font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', 'BlinkMacSystemFont', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Главный контейнер — iPad стиль */
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.68);
+            backdrop-filter: blur(40px);
+        }
+
+        /* Верхняя панель */
+        .navbar {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(20px);
+            border-bottom: 0.5px solid rgba(60, 60, 67, 0.18);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo-area h1 {
+            font-size: 28px;
+            font-weight: 640;
+            background: linear-gradient(135deg, #1C1C1E, #3A3A44);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-area p {
+            font-size: 12px;
+            color: #6C6C70;
+            font-weight: 500;
+        }
+
+        .security-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge {
+            background: rgba(0, 122, 255, 0.12);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #007AFF;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Основная двухпанельная область */
+        .main-split {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 1px;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Левая панель — список заметок */
+        .sidebar {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            border-right: 0.5px solid rgba(60, 60, 67, 0.12);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 20px 16px 12px;
+            border-bottom: 0.5px solid rgba(60, 60, 67, 0.12);
+        }
+
+        .auth-summary {
+            background: rgba(120, 120, 128, 0.1);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .auth-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .auth-row input {
+            flex: 1;
+            background: white;
+            border: 0.5px solid rgba(0,0,0,0.1);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .auth-row input:focus {
+            border-color: #007AFF;
+            box-shadow: 0 0 0 2px rgba(0,122,255,0.2);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .small-btn {
+            background: #007AFF;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 28px;
+            color: white;
+            font-weight: 590;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+        }
+
+        .small-btn-secondary {
+            background: rgba(110, 110, 120, 0.2);
+            color: #1C1C1E;
+        }
+
+        .notes-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+        }
+
+        .notes-list-header h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #2C2C2E;
+        }
+
+        .new-note-btn {
+            background: #007AFF;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 30px;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .notes-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 12px;
+        }
+
+        .note-item {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 0.5px solid rgba(0,0,0,0.05);
+        }
+
+        .note-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(2px);
+        }
+
+        .note-item.active {
+            background: white;
+            border-left: 4px solid #007AFF;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .note-title-preview {
+            font-weight: 590;
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: #1C1C1E;
+        }
+
+        .note-date {
+            font-size: 11px;
+            color: #8E8E93;
+        }
+
+        /* Правая панель — редактор */
+        .editor-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+
+        .editor-toolbar {
+            padding: 20px 28px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-bottom: 0.5px solid rgba(60, 60, 67, 0.12);
+        }
+
+        .editor-title-input {
+            font-size: 26px;
+            font-weight: 640;
+            background: transparent;
+            border: none;
+            padding: 8px 0;
+            font-family: inherit;
+            outline: none;
+            width: 60%;
+            color: #1C1C1E;
+        }
+
+        .editor-title-input::placeholder {
+            color: #C6C6C8;
+            font-weight: 500;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: rgba(120, 120, 128, 0.12);
+            border: none;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .icon-btn.danger {
+            background: rgba(255, 69, 58, 0.12);
+            color: #BF3A2F;
+        }
+
+        .editor-textarea {
+            flex: 1;
+            padding: 24px 28px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            line-height: 1.55;
+            font-family: inherit;
+            resize: none;
+            color: #1C1C1E;
+        }
+
+        .editor-textarea::placeholder {
+            color: #AEAEB2;
+        }
+
+        .bottom-status {
+            padding: 12px 28px;
+            font-size: 12px;
+            color: #6C6C70;
+            border-top: 0.5px solid rgba(60, 60, 67, 0.1);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 780px) {
+            .sidebar {
+                width: 260px;
+            }
+            .editor-title-input {
+                font-size: 20px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="navbar">
+        <div class="logo-area">
+            <h1>📓 Apple Notes</h1>
+            <p>Зашифрованный блокнот • iPad стиль</p>
+        </div>
+        <div class="security-status">
+            <div class="badge" id="globalAuthBadge">🔒 Не авторизован</div>
+            <div class="badge">AES-GCM 256</div>
+        </div>
+    </div>
+
+    <div class="main-split">
+        <!-- Левая панель: список заметок + авторизация -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="auth-summary">
+                    <div class="auth-row">
+                        <input type="text" id="userIdInput" placeholder="Ваш ID (например: iCloud_notes)" autocomplete="username">
+                        <input type="password" id="masterPassInput" placeholder="Пароль шифрования" autocomplete="current-password">
+                    </div>
+                    <div class="auth-buttons">
+                        <button id="authLoginBtn" class="small-btn">🔓 Разблокировать</button>
+                        <button id="authLogoutBtn" class="small-btn small-btn-secondary">🚪 Выйти</button>
+                    </div>
+                    <div id="authInfoMsg" style="font-size: 11px; margin-top: 8px; color:#6C6C70; text-align:center;"></div>
+                </div>
+                <div class="notes-list-header">
+                    <h3>Все заметки</h3>
+                    <button id="createNewNoteBtn" class="new-note-btn" title="Новая заметка">+</button>
+                </div>
+            </div>
+            <div class="notes-scroll" id="notesListContainer">
+                <div style="padding: 20px; text-align:center; color:#8E8E93;">🔐 Авторизуйтесь, чтобы увидеть заметки</div>
+            </div>
+            <div style="padding: 12px; font-size:11px; text-align:center; border-top: 0.5px solid rgba(0,0,0,0.05);">
+                <button id="exportAllNotesBtn" class="small-btn small-btn-secondary" style="margin: 4px;">📤 Экспорт всех (зашифр.)</button>
+                <button id="importBackupBtn" class="small-btn small-btn-secondary" style="margin: 4px;">📥 Импорт бэкапа</button>
+                <input type="file" id="importBackupFile" accept=".json" style="display: none;">
+            </div>
+        </div>
+
+        <!-- Правая панель: редактирование заметки -->
+        <div class="editor-panel">
+            <div class="editor-toolbar">
+                <input type="text" id="noteTitleEditor" class="editor-title-input" placeholder="Название заметки" autocomplete="off">
+                <div class="action-group">
+                    <button id="saveCurrentNoteBtn" class="icon-btn">💾 Сохранить</button>
+                    <button id="deleteCurrentNoteBtn" class="icon-btn danger">🗑 Удалить</button>
+                </div>
+            </div>
+            <textarea id="noteBodyEditor" class="editor-textarea" placeholder="Напишите что-нибудь... (поддерживается шифрование)"></textarea>
+            <div class="bottom-status">
+                <span id="editorStatusMsg">● Ничего не выбрано</span>
+                <span id="lockIcon">🔒 Шифрование активно</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- Криптоядро (полностью локальное) ----------
+    async function deriveKey(password, salt) {
+        const enc = new TextEncoder();
+        const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+        return await crypto.subtle.deriveKey(
+            { name: "PBKDF2", salt: salt, iterations: 210000, hash: "SHA-256" },
+            keyMaterial,
+            { name: "AES-GCM", length: 256 },
+            false,
+            ["encrypt", "decrypt"]
+        );
+    }
+
+    async function encryptData(plainObject, password) {
+        const plainJson = JSON.stringify(plainObject);
+        const encoder = new TextEncoder();
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const key = await deriveKey(password, salt);
+        const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, encoder.encode(plainJson));
+        const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+        combined.set(salt, 0);
+        combined.set(iv, salt.length);
+        combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+        return btoa(String.fromCharCode(...combined));
+    }
+
+    async function decryptData(encryptedBase64, password) {
+        const combined = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
+        const salt = combined.slice(0, 16);
+        const iv = combined.slice(16, 16+12);
+        const ciphertext = combined.slice(16+12);
+        const key = await deriveKey(password, salt);
+        try {
+            const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ciphertext);
+            const jsonStr = new TextDecoder().decode(decrypted);
+            return JSON.parse(jsonStr);
+        } catch(e) {
+            throw new Error("Неверный пароль или данные повреждены");
+        }
+    }
+
+    // ---------- Управление хранилищем (localStorage) ----------
+    const STORAGE_PREFIX = "apple_secure_notes_v2";
+
+    function getStorageKey(userId) {
+        return `${STORAGE_PREFIX}_${userId}`;
+    }
+
+    // Сохранить всю коллекцию заметок (объект) в зашифрованном виде
+    async function saveEncryptedNotesCollection(userId, password, notesCollection) {
+        const encrypted = await encryptData(notesCollection, password);
+        localStorage.setItem(getStorageKey(userId), encrypted);
+    }
+
+    // Загрузить и расшифровать коллекцию
+    async function loadEncryptedNotesCollection(userId, password) {
+        const raw = localStorage.getItem(getStorageKey(userId));
+        if (!raw) return { notes: {}, nextId: 1 };
+        return await decryptData(raw, password);
+    }
+
+    // ---------- Состояние приложения ----------
+    let currentUserId = null;
+    let currentPassword = null;
+    let notesData = { notes: {}, nextId: 1 };    // notes: { id1: {title, body, updatedAt}, id2: ... }
+    let currentNoteId = null;                    // выбранная заметка
+
+    // DOM элементы
+    const userIdInput = document.getElementById('userIdInput');
+    const masterPassInput = document.getElementById('masterPassInput');
+    const authLoginBtn = document.getElementById('authLoginBtn');
+    const authLogoutBtn = document.getElementById('authLogoutBtn');
+    const authInfoMsg = document.getElementById('authInfoMsg');
+    const notesListContainer = document.getElementById('notesListContainer');
+    const createNewNoteBtn = document.getElementById('createNewNoteBtn');
+    const noteTitleEditor = document.getElementById('noteTitleEditor');
+    const noteBodyEditor = document.getElementById('noteBodyEditor');
+    const saveCurrentNoteBtn = document.getElementById('saveCurrentNoteBtn');
+    const deleteCurrentNoteBtn = document.getElementById('deleteCurrentNoteBtn');
+    const editorStatusMsg = document.getElementById('editorStatusMsg');
+    const globalAuthBadge = document.getElementById('globalAuthBadge');
+    const exportAllNotesBtn = document.getElementById('exportAllNotesBtn');
+    const importBackupBtn = document.getElementById('importBackupBtn');
+    const importBackupFile = document.getElementById('importBackupFile');
+
+    // Обновить интерфейс (отрисовать список + активировать редактор)
+    async function refreshUI() {
+        if (!currentUserId || !currentPassword) {
+            notesListContainer.innerHTML = '<div style="padding: 20px; text-align:center; color:#8E8E93;">🔐 Введите ID и пароль, нажмите "Разблокировать"</div>';
+            globalAuthBadge.innerText = '🔒 Не авторизован';
+            noteTitleEditor.value = '';
+            noteBodyEditor.value = '';
+            editorStatusMsg.innerText = '● заблокировано';
+            currentNoteId = null;
+            return;
+        }
+        globalAuthBadge.innerText = `🔓 Активно: ${currentUserId}`;
+        // загружаем актуальные данные из хранилища (каждый раз при перерисовке)
+        try {
+            notesData = await loadEncryptedNotesCollection(currentUserId, currentPassword);
+            if (!notesData.notes) notesData.notes = {};
+            if (!notesData.nextId) notesData.nextId = 1;
+        } catch (err) {
+            authInfoMsg.innerText = `Ошибка расшифровки: ${err.message}`;
+            notesListContainer.innerHTML = `<div style="padding:20px;color:#FF3B30;">❌ Не удалось расшифровать данные. Неверный пароль?</div>`;
+            return;
+        }
+        renderNotesList();
+        // если есть выбранная заметка, обновить редактор
+        if (currentNoteId && notesData.notes[currentNoteId]) {
+            loadNoteIntoEditor(currentNoteId);
+        } else if (Object.keys(notesData.notes).length > 0) {
+            const firstId = Object.keys(notesData.notes)[0];
+            currentNoteId = firstId;
+            loadNoteIntoEditor(currentNoteId);
+        } else {
+            currentNoteId = null;
+            noteTitleEditor.value = '';
+            noteBodyEditor.value = '';
+            editorStatusMsg.innerText = '📝 Нет заметок, создайте новую';
+        }
+    }
+
+    function renderNotesList() {
+        if (!notesData.notes || Object.keys(notesData.notes).length === 0) {
+            notesListContainer.innerHTML = '<div style="padding: 24px; text-align:center; color:#8E8E93;">📭 Нет заметок. Нажмите +</div>';
+            return;
+        }
+        const sorted = Object.entries(notesData.notes).sort((a,b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0));
+        notesListContainer.innerHTML = sorted.map(([id, note]) => {
+            const preview = note.title ? note.title.substring(0, 35) : (note.body.substring(0, 30) || "Без названия");
+            const date = note.updatedAt ? new Date(note.updatedAt).toLocaleString() : "недавно";
+            const activeClass = (currentNoteId == id) ? 'active' : '';
+            return `
+                <div class="note-item ${activeClass}" data-id="${id}">
+                    <div class="note-title-preview">${escapeHtml(preview)}</div>
+                    <div class="note-date">${escapeHtml(date)}</div>
+                </div>
+            `;
+        }).join('');
+        // добавить обработчики кликов
+        document.querySelectorAll('.note-item').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const id = el.getAttribute('data-id');
+                if (id && notesData.notes[id]) {
+                    currentNoteId = id;
+                    loadNoteIntoEditor(currentNoteId);
+                    renderNotesList(); // обновить active класс
+                }
+            });
+        });
+    }
+
+    function loadNoteIntoEditor(id) {
+        const note = notesData.notes[id];
+        if (!note) return;
+        noteTitleEditor.value = note.title || '';
+        noteBodyEditor.value = note.body || '';
+        editorStatusMsg.innerText = `✏️ Редактирование: ${note.title || 'без названия'}`;
+        renderNotesList(); // синхронизировать выделение
+    }
+
+    async function saveCurrentNote() {
+        if (!currentUserId || !currentPassword) {
+            authInfoMsg.innerText = 'Авторизуйтесь перед сохранением';
+            return;
+        }
+        const title = noteTitleEditor.value.trim();
+        const body = noteBodyEditor.value;
+        if (!title && !body) {
+            editorStatusMsg.innerText = '⚠️ Нельзя сохранить пустую заметку';
+            return;
+        }
+        let noteId = currentNoteId;
+        if (!noteId || !notesData.notes[noteId]) {
+            // новая заметка
+            noteId = String(notesData.nextId || 1);
+            notesData.nextId = parseInt(noteId) + 1;
+            notesData.notes[noteId] = {
+                title: title || "Новая заметка",
+                body: body,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+            };
+        } else {
+            notesData.notes[noteId].title = title || "Без названия";
+            notesData.notes[noteId].body = body;
+            notesData.notes[noteId].updatedAt = Date.now();
+        }
+        currentNoteId = noteId;
+        try {
+            await saveEncryptedNotesCollection(currentUserId, currentPassword, { notes: notesData.notes, nextId: notesData.nextId });
+            editorStatusMsg.innerText = '✅ Сохранено и зашифровано';
+            await refreshUI(); // перезагрузить список
+        } catch (err) {
+            authInfoMsg.innerText = `Ошибка шифрования: ${err.message}`;
+        }
+    }
+
+    async function deleteCurrentNote() {
+        if (!currentNoteId || !notesData.notes[currentNoteId]) return;
+        if (!confirm('Удалить заметку навсегда?')) return;
+        delete notesData.notes[currentNoteId];
+        const remainingIds = Object.keys(notesData.notes);
+        if (remainingIds.length > 0) {
+            currentNoteId = remainingIds[0];
+        } else {
+            currentNoteId = null;
+            noteTitleEditor.value = '';
+            noteBodyEditor.value = '';
+        }
+        try {
+            await saveEncryptedNotesCollection(currentUserId, currentPassword, { notes: notesData.notes, nextId: notesData.nextId });
+            await refreshUI();
+            editorStatusMsg.innerText = currentNoteId ? 'Заметка удалена, выбрана другая' : 'Все заметки удалены';
+        } catch (err) {
+            authInfoMsg.innerText = `Ошибка: ${err.message}`;
+        }
+    }
+
+    async function createNewNote() {
+        if (!currentUserId || !currentPassword) {
+            authInfoMsg.innerText = "Сначала выполните вход";
+            return;
+        }
+        currentNoteId = null;
+        noteTitleEditor.value = '';
+        noteBodyEditor.value = '';
+        editorStatusMsg.innerText = '✏️ Новая заметка (сохраните перед выходом)';
+        // Не сохраняем автоматически, пользователь нажмет сохранить
+    }
+
+    async function login() {
+        const userId = userIdInput.value.trim();
+        const password = masterPassInput.value;
+        if (!userId || !password) {
+            authInfoMsg.innerText = 'Введите ID и пароль';
+            return;
+        }
+        currentUserId = userId;
+        currentPassword = password;
+        // пробуем загрузить коллекцию (проверка пароля)
+        try {
+            const test = await loadEncryptedNotesCollection(userId, password);
+            notesData = test;
+            if (!notesData.notes) notesData.notes = {};
+            if (!notesData.nextId) notesData.nextId = 1;
+            await refreshUI();
+            authInfoMsg.innerText = `✅ Доступ открыт. Заметок: ${Object.keys(notesData.notes).length}`;
+        } catch (err) {
+            currentUserId = null;
+            currentPassword = null;
+            authInfoMsg.innerText = `❌ Ошибка: ${err.message}. Пароль неверный или данные повреждены.`;
+            refreshUI();
+        }
+    }
+
+    function logout() {
+        currentUserId = null;
+        currentPassword = null;
+        notesData = { notes: {}, nextId: 1 };
+        currentNoteId = null;
+        userIdInput.value = '';
+        masterPassInput.value = '';
+        refreshUI();
+        authInfoMsg.innerText = 'Вы вышли из системы';
+    }
+
+    async function exportAllBackup() {
+        if (!currentUserId || !currentPassword) { authInfoMsg.innerText = 'Авторизуйтесь'; return; }
+        try {
+            const collection = await loadEncryptedNotesCollection(currentUserId, currentPassword);
+            const exportObj = {
+                version: "apple_notes_backup",
+                userId: currentUserId,
+                data: collection,
+                exportedAt: Date.now()
+            };
+            const jsonStr = JSON.stringify(exportObj, null, 2);
+            const blob = new Blob([jsonStr], {type: "application/json"});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `apple_notes_${currentUserId}.backup.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            authInfoMsg.innerText = '✅ Бэкап готов (зашифрован в экспорте)';
+        } catch(e) { authInfoMsg.innerText = 'Ошибка экспорта'; }
+    }
+
+    async function importBackup(file) {
+        if (!file) return;
+        if (!currentUserId || !currentPassword) { authInfoMsg.innerText = 'Авторизуйтесь для импорта'; return; }
+        try {
+            const text = await file.text();
+            const imported = JSON.parse(text);
+            if (imported.userId !== currentUserId) {
+                authInfoMsg.innerText = 'ID пользователя в файле не совпадает с текущим';
+                return;
+            }
+            // перезаписываем данные
+            notesData = imported.data;
+            if (!notesData.notes) notesData.notes = {};
+            if (!notesData.nextId) notesData.nextId = 1;
+            await saveEncryptedNotesCollection(currentUserId, currentPassword, { notes: notesData.notes, nextId: notesData.nextId });
+            await refreshUI();
+            authInfoMsg.innerText = 'Импорт успешен! Данные восстановлены.';
+        } catch(e) { authInfoMsg.innerText = `Ошибка импорта: ${e.message}`; }
+    }
+
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    // обработчики событий
+    authLoginBtn.addEventListener('click', login);
+    authLogoutBtn.addEventListener('click', logout);
+    createNewNoteBtn.addEventListener('click', createNewNote);
+    saveCurrentNoteBtn.addEventListener('click', saveCurrentNote);
+    deleteCurrentNoteBtn.addEventListener('click', deleteCurrentNote);
+    exportAllNotesBtn.addEventListener('click', exportAllBackup);
+    importBackupBtn.addEventListener('click', () => importBackupFile.click());
+    importBackupFile.addEventListener('change', (e) => { if(e.target.files[0]) importBackup(e.target.files[0]); importBackupFile.value = ''; });
+
+    // начальное состояние
+    refreshUI();
+</script>
+</body>
+</html>
