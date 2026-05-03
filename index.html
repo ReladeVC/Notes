@@ -246,50 +246,6 @@
             overflow: hidden;
         }
 
-        /* Панель форматирования */
-        .format-toolbar {
-            padding: 12px 24px 8px;
-            border-bottom: 0.5px solid rgba(84, 84, 88, 0.3);
-            background: rgba(28, 28, 30, 0.9);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .format-btn {
-            background: rgba(120, 120, 128, 0.15);
-            border: none;
-            padding: 8px 14px;
-            border-radius: 10px;
-            color: #FFFFFF;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: inherit;
-            min-width: 44px;
-        }
-
-        .format-btn:hover {
-            background: rgba(120, 120, 128, 0.3);
-            transform: scale(0.98);
-        }
-
-        .emoji-btn {
-            background: rgba(255, 214, 10, 0.2);
-            color: #FFD60A;
-            font-size: 18px;
-            padding: 6px 12px;
-        }
-
-        .separator {
-            width: 1px;
-            height: 28px;
-            background: rgba(84, 84, 88, 0.5);
-            margin: 0 4px;
-        }
-
         /* Окно эмодзи */
         .emoji-picker {
             position: absolute;
@@ -375,7 +331,6 @@
             color: #FF453A;
         }
 
-        /* Контейнер для редактора и просмотрщика */
         .content-container {
             flex: 1;
             position: relative;
@@ -468,8 +423,6 @@
             .auth-compact input { width: 110px; }
             .editor-title-input { font-size: 18px; }
             .backup-buttons { order: 3; width: 100%; justify-content: center; margin-top: 8px; }
-            .format-toolbar { gap: 4px; }
-            .format-btn { padding: 6px 10px; font-size: 12px; }
         }
 
         @media (max-width: 750px) {
@@ -514,22 +467,20 @@
         </div>
 
         <div class="editor-panel">
-            <!-- Панель форматирования -->
-            <div class="format-toolbar">
-                <button class="format-btn" data-format="bold" title="Жирный (Ctrl+B)"><b>B</b></button>
-                <button class="format-btn" data-format="italic" title="Курсив (Ctrl+I)"><i>I</i></button>
-                <button class="format-btn" data-format="underline" title="Подчёркивание (Ctrl+U)"><u>U</u></button>
-                <div class="separator"></div>
-                <button class="format-btn" data-format="h1" title="Заголовок 1">H1</button>
-                <button class="format-btn" data-format="h2" title="Заголовок 2">H2</button>
-                <button class="format-btn" data-format="h3" title="Заголовок 3">H3</button>
-                <div class="separator"></div>
-                <button class="format-btn" data-format="ul" title="Маркированный список">• Список</button>
-                <button class="format-btn" data-format="ol" title="Нумерованный список">1. Список</button>
-                <div class="separator"></div>
-                <button class="format-btn emoji-btn" id="emojiTriggerBtn" title="Вставить эмодзи">😊</button>
-            </div>
+            <!-- Убрана панель форматирования -->
 
+            <div class="editor-toolbar">
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                    <input type="text" id="noteTitleEditor" class="editor-title-input" placeholder="Название заметки" autocomplete="off">
+                    <button id="modeToggleBtn" class="mode-toggle" title="Переключить режим просмотра/редактирования">👁️ Режим просмотра</button>
+                </div>
+                <div class="action-group">
+                    <button id="emojiTriggerBtn" class="icon-btn" style="background: rgba(255,214,10,0.2); color: #FFD60A;">😊 Эмодзи</button>
+                    <button id="saveCurrentNoteBtn" class="icon-btn">💾 Сохранить</button>
+                    <button id="deleteCurrentNoteBtn" class="icon-btn danger">🗑 Удалить</button>
+                </div>
+            </div>
+            
             <!-- Окно эмодзи -->
             <div id="emojiPicker" class="emoji-picker">
                 <div class="emoji-item">😀</div><div class="emoji-item">😃</div><div class="emoji-item">😄</div><div class="emoji-item">😁</div>
@@ -550,17 +501,6 @@
                 <div class="emoji-item">💙</div><div class="emoji-item">💜</div><div class="emoji-item">🖤</div><div class="emoji-item">🤍</div>
                 <div class="emoji-item">👍</div><div class="emoji-item">👎</div><div class="emoji-item">👌</div><div class="emoji-item">✌️</div>
                 <div class="emoji-item">🤞</div><div class="emoji-item">🤟</div><div class="emoji-item">🤘</div><div class="emoji-item">👏</div>
-            </div>
-
-            <div class="editor-toolbar">
-                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                    <input type="text" id="noteTitleEditor" class="editor-title-input" placeholder="Название заметки" autocomplete="off">
-                    <button id="modeToggleBtn" class="mode-toggle" title="Переключить режим просмотра/редактирования">👁️ Режим просмотра</button>
-                </div>
-                <div class="action-group">
-                    <button id="saveCurrentNoteBtn" class="icon-btn">💾 Сохранить</button>
-                    <button id="deleteCurrentNoteBtn" class="icon-btn danger">🗑 Удалить</button>
-                </div>
             </div>
             
             <div class="content-container">
@@ -638,89 +578,44 @@
         }, duration);
     }
 
-    // ========== ФУНКЦИИ ФОРМАТИРОВАНИЯ ТЕКСТА ==========
-    function insertFormat(startTag, endTag) {
-        const textarea = document.getElementById('noteBodyEditor');
-        if (!textarea) return;
-        
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const selectedText = textarea.value.substring(start, end);
-        const beforeText = textarea.value.substring(0, start);
-        const afterText = textarea.value.substring(end);
-        
-        let newText;
-        if (selectedText) {
-            newText = beforeText + startTag + selectedText + endTag + afterText;
-        } else {
-            newText = beforeText + startTag + endTag + afterText;
-            const newCursorPos = start + startTag.length;
-            setTimeout(() => {
-                textarea.selectionStart = newCursorPos;
-                textarea.selectionEnd = newCursorPos;
-                textarea.focus();
-            }, 0);
-        }
-        textarea.value = newText;
-        textarea.focus();
+    // ========== ВСТАВКА ЭМОДЗИ ==========
+    const emojiTriggerBtn = document.getElementById('emojiTriggerBtn');
+    const emojiPicker = document.getElementById('emojiPicker');
+    
+    function showEmojiPicker(event) {
+        const rect = emojiTriggerBtn.getBoundingClientRect();
+        emojiPicker.style.top = rect.bottom + 5 + 'px';
+        emojiPicker.style.left = rect.left + 'px';
+        emojiPicker.classList.toggle('show');
     }
     
-    function insertList(type) {
+    function insertEmoji(emoji) {
         const textarea = document.getElementById('noteBodyEditor');
-        if (!textarea) return;
-        
-        const start = textarea.selectionStart;
-        const lineStart = textarea.value.lastIndexOf('\n', start - 1) + 1;
-        const lineEnd = textarea.value.indexOf('\n', lineStart);
-        const currentLine = textarea.value.substring(lineStart, lineEnd === -1 ? textarea.value.length : lineEnd);
-        
-        let prefix = type === 'ul' ? '- ' : '1. ';
-        
-        if (currentLine.startsWith('- ') || currentLine.match(/^\d+\. /)) {
-            const newLine = currentLine.replace(/^[-*] |^\d+\. /, '');
-            const newText = textarea.value.substring(0, lineStart) + newLine + textarea.value.substring(lineStart + currentLine.length);
-            textarea.value = newText;
-            const newPos = lineStart + newLine.length;
-            setTimeout(() => {
-                textarea.selectionStart = newPos;
-                textarea.selectionEnd = newPos;
-                textarea.focus();
-            }, 0);
-        } else {
-            const newText = textarea.value.substring(0, lineStart) + prefix + currentLine + textarea.value.substring(lineStart + currentLine.length);
-            textarea.value = newText;
-            const newPos = lineStart + prefix.length + currentLine.length;
-            setTimeout(() => {
-                textarea.selectionStart = newPos;
-                textarea.selectionEnd = newPos;
-                textarea.focus();
-            }, 0);
-        }
-    }
-    
-    function insertHeader(level) {
-        const textarea = document.getElementById('noteBodyEditor');
-        if (!textarea) return;
-        
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
-        const selectedText = textarea.value.substring(start, end);
         const beforeText = textarea.value.substring(0, start);
         const afterText = textarea.value.substring(end);
-        
-        const headerTag = '#'.repeat(level);
-        let newText;
-        
-        if (selectedText) {
-            newText = beforeText + headerTag + ' ' + selectedText + '\n' + afterText;
-        } else {
-            newText = beforeText + headerTag + ' ' + afterText;
-        }
-        textarea.value = newText;
-        textarea.focus();
+        textarea.value = beforeText + emoji + afterText;
+        const newPos = start + emoji.length;
+        setTimeout(() => {
+            textarea.selectionStart = newPos;
+            textarea.selectionEnd = newPos;
+            textarea.focus();
+        }, 0);
+        emojiPicker.classList.remove('show');
     }
+    
+    document.addEventListener('click', function(e) {
+        if (emojiPicker && !emojiPicker.contains(e.target) && e.target !== emojiTriggerBtn) {
+            emojiPicker.classList.remove('show');
+        }
+    });
+    
+    document.querySelectorAll('.emoji-item').forEach(item => {
+        item.addEventListener('click', () => insertEmoji(item.textContent));
+    });
 
-    // ========== ПРЕОБРАЗОВАНИЕ МАРКДАУНА В HTML ==========
+    // ========== ПРЕОБРАЗОВАНИЕ МАРКДАУНА В HTML (ДЛЯ ПРОСМОТРА) ==========
     function convertMarkdownToHtml(text) {
         if (!text) return '';
         
@@ -747,22 +642,23 @@
         // Восстанавливаем теги
         html = html.replace(/&lt;(\/?)(strong|em|u|h[1-3])&gt;/g, '<$1$2>');
         
-        // Списки
-        let hasListItems = false;
+        // Маркированные списки
+        let hasUl = false;
         html = html.replace(/^- (.*$)/gm, function(match) {
-            hasListItems = true;
+            hasUl = true;
             return '<li style="margin-left: 20px; margin-bottom: 4px;">' + match.substring(2) + '</li>';
         });
-        if (hasListItems) {
+        if (hasUl) {
             html = html.replace(/(<li[^>]*>.*<\/li>)+/g, '<ul style="margin: 8px 0;">$&</ul>');
         }
         
-        let hasOrderedItems = false;
+        // Нумерованные списки
+        let hasOl = false;
         html = html.replace(/^\d+\. (.*$)/gm, function(match) {
-            hasOrderedItems = true;
+            hasOl = true;
             return '<li style="margin-left: 20px; margin-bottom: 4px;">' + match.replace(/^\d+\. /, '') + '</li>';
         });
-        if (hasOrderedItems) {
+        if (hasOl) {
             html = html.replace(/(<li[^>]*>.*<\/li>)+/g, '<ol style="margin: 8px 0;">$&</ol>');
         }
         
@@ -823,7 +719,7 @@
     }
 
     // ========== ХРАНИЛИЩЕ ==========
-    const STORAGE_PREFIX = "vc_secure_notes_v2";
+    const STORAGE_PREFIX = "vc_secure_notes_v3";
     function getStorageKey(userId) { return `${STORAGE_PREFIX}_${userId}`; }
     async function saveEncryptedNotesCollection(userId, password, notesCollection) {
         const encrypted = await encryptData(notesCollection, password);
@@ -854,51 +750,18 @@
     const exportAllNotesBtn = document.getElementById('exportAllNotesBtn');
     const importBackupBtn = document.getElementById('importBackupBtn');
     const modeToggleBtn = document.getElementById('modeToggleBtn');
-    const emojiTriggerBtn = document.getElementById('emojiTriggerBtn');
-    const emojiPicker = document.getElementById('emojiPicker');
-
-    // ========== ФУНКЦИИ ЭМОДЗИ ==========
-    function showEmojiPicker(event) {
-        const rect = emojiTriggerBtn.getBoundingClientRect();
-        emojiPicker.style.top = rect.bottom + 5 + 'px';
-        emojiPicker.style.left = rect.left + 'px';
-        emojiPicker.classList.toggle('show');
-    }
-    
-    function insertEmoji(emoji) {
-        const start = noteBodyEditor.selectionStart;
-        const end = noteBodyEditor.selectionEnd;
-        const beforeText = noteBodyEditor.value.substring(0, start);
-        const afterText = noteBodyEditor.value.substring(end);
-        noteBodyEditor.value = beforeText + emoji + afterText;
-        const newPos = start + emoji.length;
-        setTimeout(() => {
-            noteBodyEditor.selectionStart = newPos;
-            noteBodyEditor.selectionEnd = newPos;
-            noteBodyEditor.focus();
-        }, 0);
-        emojiPicker.classList.remove('show');
-    }
-    
-    document.addEventListener('click', function(e) {
-        if (emojiPicker && !emojiPicker.contains(e.target) && e.target !== emojiTriggerBtn) {
-            emojiPicker.classList.remove('show');
-        }
-    });
-    
-    document.querySelectorAll('.emoji-item').forEach(item => {
-        item.addEventListener('click', () => insertEmoji(item.textContent));
-    });
 
     // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
     function toggleMode() {
         isViewMode = !isViewMode;
         if (isViewMode) {
+            // Включаем режим просмотра
             noteBodyEditor.style.display = 'none';
             noteViewer.style.display = 'block';
             modeToggleBtn.textContent = '✏️ Режим редактирования';
             updateViewerContent();
         } else {
+            // Включаем режим редактирования
             noteBodyEditor.style.display = 'block';
             noteViewer.style.display = 'none';
             modeToggleBtn.textContent = '👁️ Режим просмотра';
@@ -908,10 +771,10 @@
     function updateViewerContent() {
         if (currentNoteId && notesData.notes[currentNoteId]) {
             const note = notesData.notes[currentNoteId];
-            const title = note.title || 'Без названия';
             const body = note.body || '';
             const htmlBody = convertMarkdownToHtml(body);
-            noteViewer.innerHTML = `<h2 style="color: #FFFFFF; margin-bottom: 16px; font-weight: 620; font-size: 24px;">${escapeHtml(title)}</h2><div style="color: #FFFFFF; line-height: 1.55;">${htmlBody}</div>`;
+            // В режиме просмотра показываем только тело заметки (заголовок уже отображается в поле ввода)
+            noteViewer.innerHTML = `<div style="color: #FFFFFF; line-height: 1.55;">${htmlBody}</div>`;
         } else {
             noteViewer.innerHTML = '<div style="color: #8E8E93; text-align: center; padding: 40px;">Выберите заметку для просмотра</div>';
         }
@@ -1107,7 +970,7 @@
         try {
             const currentNotes = await loadEncryptedNotesCollection(currentUserId, currentPassword);
             const backupObject = {
-                version: "vc_notes_encrypted_v2",
+                version: "vc_notes_encrypted_v3",
                 userId: currentUserId,
                 encryptedData: await encryptData(currentNotes, currentPassword),
                 exportedAt: Date.now(),
@@ -1135,7 +998,7 @@
         try {
             const text = await file.text();
             const imported = JSON.parse(text);
-            if (imported.version !== "vc_notes_encrypted_v2") {
+            if (imported.version !== "vc_notes_encrypted_v3") {
                 showMessage('authInfoMsg', '❌ Неподдерживаемый формат бэкапа', true);
                 return;
             }
@@ -1174,23 +1037,6 @@
     }
 
     // ========== ИНИЦИАЛИЗАЦИЯ ==========
-    document.querySelectorAll('[data-format]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const format = btn.getAttribute('data-format');
-            switch(format) {
-                case 'bold': insertFormat('**', '**'); break;
-                case 'italic': insertFormat('*', '*'); break;
-                case 'underline': insertFormat('__', '__'); break;
-                case 'h1': insertHeader(1); break;
-                case 'h2': insertHeader(2); break;
-                case 'h3': insertHeader(3); break;
-                case 'ul': insertList('ul'); break;
-                case 'ol': insertList('ol'); break;
-            }
-            noteBodyEditor.focus();
-        });
-    });
-    
     authLoginBtn.addEventListener('click', login);
     authLogoutBtn.addEventListener('click', logout);
     createNewNoteBtn.addEventListener('click', createNewNote);
