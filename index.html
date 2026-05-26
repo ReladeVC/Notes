@@ -2,464 +2,659 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VC Notes — защищённый блокнот</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
         :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #141414;
-            --bg-tertiary: #1a1a1a;
-            --bg-elevated: #222222;
-            --border-subtle: rgba(255, 255, 255, 0.06);
-            --border-medium: rgba(255, 255, 255, 0.1);
-            --text-primary: #fafafa;
-            --text-secondary: #a1a1a1;
-            --text-tertiary: #737373;
+            --bg-0: #050505;
+            --bg-1: #0a0a0b;
+            --bg-2: #111113;
+            --bg-3: #17171a;
+            --bg-4: #1e1e22;
+            
+            --surface-1: rgba(255, 255, 255, 0.04);
+            --surface-2: rgba(255, 255, 255, 0.06);
+            --surface-3: rgba(255, 255, 255, 0.08);
+            
+            --border-0: rgba(255, 255, 255, 0.04);
+            --border-1: rgba(255, 255, 255, 0.08);
+            --border-2: rgba(255, 255, 255, 0.12);
+            
+            --text-0: #fafafa;
+            --text-1: #e5e5e5;
+            --text-2: #a1a1a1;
+            --text-3: #737373;
+            --text-4: #525252;
+            
             --accent: #0a84ff;
             --accent-hover: #0070e0;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
-            --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
-            --gradient-primary: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-            --gradient-accent: linear-gradient(135deg, #0a84ff 0%, #0055d4 100%);
-            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --accent-glow: rgba(10, 132, 255, 0.4);
+            --accent-soft: rgba(10, 132, 255, 0.12);
+            
+            --violet: #8b5cf6;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --rose: #f43f5e;
+            
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            
+            --transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+            --transition-normal: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
         }
 
         body {
-            background: var(--bg-primary);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            height: 100vh;
-            overflow: hidden;
-            color: var(--text-primary);
+            background: var(--bg-0);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--text-0);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.011em;
         }
 
+        /* ===== AMBIENT BACKGROUND (OPTIMIZED) ===== */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .bg-gradient {
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(10, 132, 255, 0.15), transparent 50%),
+                radial-gradient(ellipse 60% 50% at 85% 20%, rgba(139, 92, 246, 0.12), transparent 50%);
+        }
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.4;
+            transition: transform 0.8s ease-out;
+            will-change: transform;
+        }
+        .bg-orb-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(10,132,255,0.3), transparent 70%);
+            top: -200px;
+            left: -200px;
+            filter: blur(60px);
+        }
+        .bg-orb-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139,92,246,0.25), transparent 70%);
+            bottom: -150px;
+            right: -150px;
+            filter: blur(60px);
+        }
+        .bg-noise {
+            position: absolute;
+            inset: 0;
+            opacity: 0.03;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* ===== APP CONTAINER ===== */
         .app {
             height: 100vh;
             display: flex;
             flex-direction: column;
-            background: var(--bg-secondary);
-            position: relative;
-        }
-
-        .app::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(10, 132, 255, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(10, 132, 255, 0.05) 0%, transparent 40%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Верхняя панель */
-        .navbar {
-            background: rgba(20, 20, 20, 0.85);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border-bottom: 1px solid var(--border-subtle);
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            flex-shrink: 0;
-            position: relative;
-            z-index: 100;
-            box-shadow: var(--shadow-md);
-        }
-
-        .logo {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .logo h1 {
-            font-size: 24px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ffffff 0%, #a1a1a1 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            letter-spacing: -0.5px;
-        }
-
-        .logo p {
-            font-size: 11px;
-            color: var(--accent);
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .auth {
-            display: flex;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 10px 16px;
-            border-radius: 16px;
-            border: 1px solid var(--border-subtle);
-            flex-wrap: wrap;
-            transition: all 0.3s ease;
-        }
-
-        .auth:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--border-medium);
-        }
-
-        .auth input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            padding: 10px 16px;
-            font-size: 13px;
-            color: var(--text-primary);
-            width: 160px;
-            transition: all 0.2s ease;
-        }
-
-        .auth input:focus {
-            border-color: var(--accent);
-            background: rgba(255, 255, 255, 0.08);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.1);
-        }
-
-        .auth input::placeholder {
-            color: var(--text-tertiary);
-        }
-
-        .auth button, .small-btn {
-            background: var(--gradient-accent);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .auth button::before, .small-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .auth button:hover::before, .small-btn:hover::before {
-            left: 100%;
-        }
-
-        .auth button:hover, .small-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .auth button:active, .small-btn:active {
-            transform: translateY(0);
-        }
-
-        .auth button.outline, .small-btn.outline {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-            border: 1px solid var(--border-medium);
-        }
-
-        .auth button.outline:hover, .small-btn.outline:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--text-secondary);
-        }
-
-        .badge {
-            background: rgba(10, 132, 255, 0.1);
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: var(--accent);
-            border: 1px solid rgba(10, 132, 255, 0.2);
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        /* Основная область */
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            gap: 1px;
-            background: rgba(0, 0, 0, 0.5);
             position: relative;
             z-index: 1;
         }
 
-        /* Список заметок */
-        .sidebar {
-            width: 320px;
-            background: rgba(20, 20, 20, 0.9);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid var(--border-subtle);
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: rgba(10, 10, 11, 0.8);
+            border-bottom: 1px solid var(--border-1);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--accent) 0%, #0055d4 100%);
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            box-shadow: 0 4px 16px var(--accent-glow);
+            transition: transform var(--transition-normal);
+        }
+        .logo:hover .logo-icon {
+            transform: rotate(-8deg) scale(1.05);
+        }
+
+        .logo-text {
             display: flex;
             flex-direction: column;
+            gap: 2px;
+        }
+        .logo h1 {
+            font-size: 17px;
+            font-weight: 700;
+            background: linear-gradient(180deg, #ffffff 0%, #a1a1a1 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+        .logo p {
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+        .logo p::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 8px var(--emerald);
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .auth {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 6px;
+            border-radius: var(--radius-xl);
+            background: var(--surface-1);
+            border: 1px solid var(--border-0);
+        }
+        .auth input {
+            background: var(--bg-3);
+            border: 1px solid var(--border-0);
+            border-radius: var(--radius-md);
+            padding: 9px 14px;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text-0);
+            width: 150px;
+            transition: all var(--transition-fast);
+        }
+        .auth input::placeholder { color: var(--text-4); }
+        .auth input:focus {
+            border-color: var(--accent);
+            background: var(--bg-4);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        /* ===== LANGUAGE BUTTON ===== */
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 100px;
+            background: var(--surface-1);
+            border: 1px solid var(--border-1);
+            color: var(--text-1);
+            font-size: 12.5px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        .lang-btn:hover {
+            background: var(--surface-2);
+            border-color: var(--accent);
+            color: var(--text-0);
+            transform: translateY(-1px);
+        }
+        .lang-btn:active {
+            transform: translateY(0) scale(0.97);
+        }
+        .lang-flag {
+            font-size: 15px;
+            transition: transform var(--transition-normal);
+        }
+        .lang-btn:hover .lang-flag {
+            transform: rotate(-15deg) scale(1.15);
+        }
+        .lang-text {
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.08em;
+            font-size: 11px;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .btn-primary {
+            background: linear-gradient(180deg, var(--accent) 0%, #0066e0 100%);
+            color: #fff;
+            border-color: rgba(255,255,255,0.1);
+            box-shadow: 0 2px 8px var(--accent-glow);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(180deg, #0077ee 0%, #0055c0 100%);
+            box-shadow: 0 4px 16px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-ghost {
+            background: var(--surface-1);
+            color: var(--text-1);
+            border-color: var(--border-1);
+        }
+        .btn-ghost:hover {
+            background: var(--surface-2);
+            border-color: var(--border-2);
+            color: var(--text-0);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--surface-1);
+            border: 1px solid var(--border-1);
+            color: var(--text-2);
+            letter-spacing: 0.02em;
+            transition: all var(--transition-normal);
+        }
+        .badge.active {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-4);
+            transition: all var(--transition-fast);
+        }
+        .badge.active .dot {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main {
+            flex: 1;
+            display: flex;
             overflow: hidden;
             position: relative;
         }
 
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 340px;
+            background: rgba(10, 10, 11, 0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-right: 1px solid var(--border-0);
+        }
         .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border-subtle);
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid var(--border-0);
+        }
+        .msg-area {
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-normal);
+            margin-bottom: 4px;
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+        .msg-area.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .msg-area.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--emerald);
+        }
+        .msg-area.error {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            color: var(--rose);
+        }
+        .msg-area.info {
+            background: var(--accent-soft);
+            border: 1px solid rgba(10, 132, 255, 0.2);
+            color: var(--accent);
         }
 
         .notes-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 20px;
+            padding: 4px 0;
         }
-
         .notes-header h3 {
-            color: var(--text-primary);
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 600;
-            letter-spacing: -0.3px;
+            color: var(--text-2);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
 
         .new-btn {
-            background: var(--gradient-accent);
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--violet) 100%);
+            display: grid;
+            place-items: center;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
-            color: white;
+            transition: all var(--transition-normal);
+            box-shadow: 0 2px 8px var(--accent-glow);
+            position: relative;
+            overflow: hidden;
+        }
+        .new-btn::after {
+            content: '+';
+            color: #fff;
+            font-size: 20px;
             font-weight: 300;
+            transition: transform var(--transition-normal);
         }
-
         .new-btn:hover {
+            box-shadow: 0 4px 16px var(--accent-glow);
             transform: scale(1.05);
-            box-shadow: var(--shadow-md);
         }
-
+        .new-btn:hover::after {
+            transform: rotate(90deg);
+        }
         .new-btn:active {
-            transform: scale(0.98);
+            transform: scale(0.95);
         }
 
         .notes-list {
             flex: 1;
             overflow-y: auto;
-            padding: 12px 16px;
+            overflow-x: hidden;
+            padding: 8px 12px 16px;
         }
-
         .notes-list::-webkit-scrollbar {
             width: 6px;
         }
-
         .notes-list::-webkit-scrollbar-track {
             background: transparent;
         }
-
         .notes-list::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--border-2);
             border-radius: 3px;
         }
 
-        .notes-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
         .note-item {
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            border: 1px solid var(--border-subtle);
-            transition: all 0.2s ease;
             position: relative;
+            background: var(--surface-1);
+            border: 1px solid var(--border-0);
+            border-radius: var(--radius-md);
+            padding: 14px 14px 12px 16px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
             overflow: hidden;
         }
-
         .note-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 3px;
+            border-radius: 0 2px 2px 0;
+            background: linear-gradient(180deg, var(--accent), var(--violet));
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: all var(--transition-normal);
+        }
+        .note-item:hover {
+            background: var(--surface-2);
+            border-color: var(--border-1);
+            transform: translateX(2px);
+        }
+        .note-item:hover::before {
+            opacity: 0.5;
+            transform: translateX(0);
+        }
+        .note-item.active {
+            background: var(--surface-2);
+            border-color: var(--border-2);
+        }
+        .note-item.active::before {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .note-title {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-0);
+            margin-bottom: 4px;
+            line-height: 1.4;
+            letter-spacing: -0.01em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .note-preview {
+            font-size: 12px;
+            color: var(--text-3);
+            line-height: 1.4;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .note-date {
+            font-size: 10.5px;
+            color: var(--text-4);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.02em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .note-date::before {
+            content: '';
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--text-4);
+        }
+
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-3);
+            font-size: 13px;
+        }
+        .empty-state .emoji {
+            font-size: 40px;
+            margin-bottom: 12px;
+            display: block;
+            opacity: 0.5;
+        }
+
+        /* ===== EDITOR ===== */
+        .editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-1);
+            overflow: hidden;
+            position: relative;
+        }
+        .editor::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 2px;
-            background: var(--gradient-accent);
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .note-item:hover {
-            background: var(--bg-elevated);
-            border-color: var(--border-medium);
-            transform: translateX(2px);
-        }
-
-        .note-item:hover::before {
-            opacity: 1;
-        }
-
-        .note-item.active {
-            background: var(--bg-elevated);
-            border-left: 3px solid var(--accent);
-            box-shadow: var(--shadow-md);
-        }
-
-        .note-item.active::before {
-            opacity: 1;
-        }
-
-        .note-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .note-date {
-            font-size: 11px;
-            color: var(--text-tertiary);
-            font-weight: 500;
-        }
-
-        /* Редактор */
-        .editor {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-secondary);
-            overflow: hidden;
-            position: relative;
+            height: 40%;
+            background: radial-gradient(ellipse at top, var(--accent-soft), transparent 60%);
+            pointer-events: none;
+            opacity: 0.3;
         }
 
         .editor-toolbar {
-            padding: 20px 32px;
+            padding: 16px 28px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 16px;
-            border-bottom: 1px solid var(--border-subtle);
-            background: rgba(20, 20, 20, 0.5);
-            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-0);
+            background: rgba(10, 10, 11, 0.4);
+            z-index: 2;
         }
 
         .title-input {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
             background: transparent;
             border: none;
-            color: var(--text-primary);
+            color: var(--text-0);
             flex: 1;
             outline: none;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.025em;
+            font-family: inherit;
+            caret-color: var(--accent);
         }
-
         .title-input::placeholder {
-            color: var(--text-tertiary);
+            color: var(--text-4);
+            font-weight: 600;
         }
 
         .action-buttons {
             display: flex;
-            gap: 12px;
+            gap: 8px;
         }
-
         .icon-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-medium);
-            padding: 10px 20px;
-            border-radius: 12px;
-            color: var(--text-primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12.5px;
+            font-weight: 500;
+            font-family: inherit;
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
+            border: 1px solid var(--border-1);
+            background: var(--surface-1);
+            color: var(--text-1);
+            transition: all var(--transition-fast);
         }
-
-        .icon-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translate(-50%, -50%);
-            transition: width 0.4s ease, height 0.4s ease;
-        }
-
-        .icon-btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
         .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--text-secondary);
-            transform: translateY(-1px);
+            background: var(--surface-2);
+            border-color: var(--border-2);
+            color: var(--text-0);
         }
-
-        .icon-btn:active {
-            transform: translateY(0);
-        }
-
         .icon-btn.emoji {
-            background: rgba(245, 158, 11, 0.1);
-            border-color: rgba(245, 158, 11, 0.3);
-            color: var(--warning);
+            background: rgba(245, 158, 11, 0.08);
+            border-color: rgba(245, 158, 11, 0.2);
+            color: var(--amber);
         }
-
         .icon-btn.emoji:hover {
-            background: rgba(245, 158, 11, 0.15);
+            background: rgba(245, 158, 11, 0.14);
+            border-color: rgba(245, 158, 11, 0.3);
         }
-
+        .icon-btn.mode {
+            background: var(--surface-2);
+            border-color: var(--border-2);
+        }
+        .icon-btn.save {
+            background: linear-gradient(180deg, var(--accent) 0%, #0066e0 100%);
+            border-color: rgba(255,255,255,0.1);
+            color: #fff;
+            box-shadow: 0 2px 8px var(--accent-glow);
+        }
+        .icon-btn.save:hover {
+            background: linear-gradient(180deg, #0077ee 0%, #0055c0 100%);
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
         .icon-btn.danger {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: var(--danger);
+            background: rgba(244, 63, 94, 0.08);
+            border-color: rgba(244, 63, 94, 0.2);
+            color: var(--rose);
         }
-
         .icon-btn.danger:hover {
-            background: rgba(239, 68, 68, 0.15);
+            background: rgba(244, 63, 94, 0.14);
+            border-color: rgba(244, 63, 94, 0.3);
         }
 
         .content-container {
@@ -470,246 +665,501 @@
 
         textarea, .viewer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            padding: 32px 40px;
-            font-size: 16px;
-            line-height: 1.7;
+            inset: 0;
+            padding: 32px 40px 80px;
+            font-size: 15.5px;
+            line-height: 1.75;
             background: transparent;
             border: none;
             outline: none;
-            color: var(--text-primary);
+            color: var(--text-1);
             overflow-y: auto;
             font-family: inherit;
+            resize: none;
+            caret-color: var(--accent);
+            letter-spacing: -0.005em;
         }
-
         textarea::placeholder {
-            color: var(--text-tertiary);
+            color: var(--text-4);
         }
-
         textarea::-webkit-scrollbar, .viewer::-webkit-scrollbar {
             width: 8px;
         }
-
-        textarea::-webkit-scrollbar-track, .viewer::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
         textarea::-webkit-scrollbar-thumb, .viewer::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--border-1);
             border-radius: 4px;
         }
 
-        textarea::-webkit-scrollbar-thumb:hover, .viewer::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
         .viewer {
-            background: var(--bg-secondary);
+            background: var(--bg-1);
         }
-
-        .viewer a {
-            color: var(--accent) !important;
-            text-decoration: underline;
-            transition: color 0.2s ease;
+        .viewer h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 32px 0 16px;
+            background: linear-gradient(180deg, #fff 0%, #a1a1a1 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
         }
-
-        .viewer a:hover {
-            color: var(--accent-hover) !important;
+        .viewer h1:first-child {
+            margin-top: 0;
         }
-
-        .viewer h1, .viewer h2, .viewer h3 {
-            margin-top: 24px;
-            margin-bottom: 12px;
-            color: var(--text-primary);
+        .viewer h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 28px 0 12px;
+            color: var(--text-0);
+            letter-spacing: -0.025em;
         }
-
-        .viewer h1 { font-size: 28px; }
-        .viewer h2 { font-size: 24px; }
-        .viewer h3 { font-size: 20px; }
-
-        .viewer ul, .viewer ol {
+        .viewer h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 24px 0 10px;
+            color: var(--text-0);
+        }
+        .viewer p {
             margin: 12px 0;
-            padding-left: 32px;
         }
-
+        .viewer strong {
+            color: var(--text-0);
+            font-weight: 700;
+        }
+        .viewer a {
+            color: var(--accent);
+            text-decoration: none;
+            border-bottom: 1px solid var(--accent-soft);
+            transition: all var(--transition-fast);
+        }
+        .viewer a:hover {
+            border-bottom-color: var(--accent);
+        }
+        .viewer ul {
+            margin: 12px 0;
+            padding-left: 24px;
+            list-style: none;
+        }
         .viewer li {
+            position: relative;
             margin: 8px 0;
+            padding-left: 4px;
         }
-
-        .bottom-status {
-            padding: 12px 32px;
-            font-size: 12px;
-            color: var(--text-tertiary);
-            border-top: 1px solid var(--border-subtle);
-            background: rgba(20, 20, 20, 0.5);
-            font-weight: 500;
-        }
-
-        /* Эмодзи-пикер */
-        .emoji-picker {
+        .viewer li::before {
+            content: '';
             position: absolute;
-            background: var(--bg-elevated);
-            border-radius: 16px;
-            padding: 16px;
+            left: -16px;
+            top: 10px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        /* ===== STATUS BAR ===== */
+        .bottom-status {
+            padding: 10px 28px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-3);
+            border-top: 1px solid var(--border-0);
+            background: rgba(10, 10, 11, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.02em;
+        }
+        .bottom-status .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-4);
+            transition: all var(--transition-fast);
+        }
+        .bottom-status.saving .status-dot {
+            background: var(--amber);
+            box-shadow: 0 0 8px var(--amber);
+        }
+        .bottom-status.saved .status-dot {
+            background: var(--emerald);
+            box-shadow: 0 0 8px var(--emerald);
+        }
+        .bottom-status.error .status-dot {
+            background: var(--rose);
+            box-shadow: 0 0 8px var(--rose);
+        }
+
+        /* ===== EMOJI PICKER ===== */
+        .emoji-picker {
+            position: fixed;
+            background: rgba(23, 23, 26, 0.95);
+            border-radius: var(--radius-lg);
+            padding: 14px;
             display: none;
             grid-template-columns: repeat(8, 1fr);
-            gap: 8px;
-            max-width: 380px;
+            gap: 4px;
+            max-width: 360px;
             z-index: 1000;
-            border: 1px solid var(--border-medium);
-            box-shadow: var(--shadow-xl);
-            backdrop-filter: blur(20px);
-            animation: slideDown 0.2s ease;
+            border: 1px solid var(--border-2);
+            box-shadow: 0 20px 48px rgba(0,0,0,0.7);
         }
-
-        @keyframes slideDown {
+        .emoji-picker.show {
+            display: grid;
+            animation: emojiAppear 0.2s ease-out;
+        }
+        @keyframes emojiAppear {
             from {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateY(-8px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-
-        .emoji-picker.show {
-            display: grid;
-        }
-
         .emoji-item {
-            font-size: 28px;
+            font-size: 22px;
             cursor: pointer;
             text-align: center;
-            padding: 10px;
-            border-radius: 10px;
-            transition: all 0.15s ease;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+            aspect-ratio: 1;
+            display: grid;
+            place-items: center;
         }
-
         .emoji-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.1);
+            background: var(--surface-3);
+            transform: scale(1.2);
         }
 
-        .emoji-item:active {
-            transform: scale(0.95);
+        /* ===== PARTICLES ===== */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            font-size: 20px;
+            animation: particleBurst 0.8s ease-out forwards;
+        }
+        @keyframes particleBurst {
+            0% {
+                transform: translate(0, 0) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--r));
+                opacity: 0;
+            }
         }
 
-        /* Loading states */
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        /* ===== LOADING RING ===== */
+        .loading-ring {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border-1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spinRing 0.8s linear infinite;
+        }
+        @keyframes spinRing {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        .loading {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        /* ===== CONFIRM DIALOG ===== */
+        .dialog-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
         }
-
-        /* Message animations */
+        .dialog-overlay.show {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        #msgArea {
-            animation: fadeIn 0.3s ease;
+        .dialog {
+            background: var(--bg-3);
+            border: 1px solid var(--border-2);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            max-width: 380px;
+            width: calc(100% - 40px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            animation: dialogAppear 0.3s ease-out;
+        }
+        @keyframes dialogAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .dialog h4 {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-0);
+        }
+        .dialog p {
+            font-size: 13.5px;
+            color: var(--text-2);
+            line-height: 1.55;
+            margin-bottom: 24px;
+        }
+        .dialog-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .dialog-actions .btn {
+            padding: 10px 18px;
+        }
+        .btn-danger {
+            background: linear-gradient(180deg, var(--rose) 0%, #dc2626 100%);
+            color: #fff;
+            border-color: rgba(255,255,255,0.1);
+            box-shadow: 0 2px 8px rgba(244, 63, 94, 0.4);
+        }
+        .btn-danger:hover {
+            box-shadow: 0 4px 16px rgba(244, 63, 94, 0.5);
         }
 
-        @media (max-width: 750px) {
-            .sidebar { 
-                width: 280px; 
-            }
-            .auth input { 
-                width: 120px; 
-            }
-            .navbar {
-                padding: 12px 20px;
-            }
-            .editor-toolbar {
-                padding: 16px 20px;
-            }
-            textarea, .viewer {
-                padding: 20px 24px;
-            }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { width: 260px; }
+            .auth input { width: 100px; }
+            .navbar { padding: 12px 16px; gap: 10px; }
+            .title-input { font-size: 20px; }
+            textarea, .viewer { padding: 20px 24px 60px; font-size: 14.5px; }
+            .editor-toolbar { padding: 12px 16px; }
+            .logo p { display: none; }
         }
     </style>
 </head>
 <body>
+
+<div class="bg-layer">
+    <div class="bg-gradient"></div>
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-noise"></div>
+</div>
+
 <div class="app">
-    <div class="navbar">
+    <nav class="navbar">
         <div class="logo">
-            <h1>📓 VC Notes</h1>
-            <p>🔒 AES-GCM 256</p>
+            <div class="logo-icon">📓</div>
+            <div class="logo-text">
+                <h1>VC Notes</h1>
+                <p data-i18n="endToEnd">End-to-end encrypted</p>
+            </div>
         </div>
         <div class="auth">
-            <input type="text" id="userId" placeholder="Ваш ID">
-            <input type="password" id="password" placeholder="Пароль">
-            <button id="loginBtn">Разблокировать</button>
-            <button id="logoutBtn" class="outline">Выйти</button>
-            <button id="exportBtn" class="small-btn outline">🔒 Экспорт</button>
-            <button id="importBtn" class="small-btn outline">📥 Импорт</button>
+            <input type="text" id="userId" data-i18n-ph="userId" placeholder="User ID">
+            <input type="password" id="password" data-i18n-ph="password" placeholder="Password">
+            <button id="loginBtn" class="btn btn-primary" data-i18n="unlock">🔓 Unlock</button>
+            <button id="logoutBtn" class="btn btn-ghost" data-i18n="signout">Sign out</button>
+            <button id="exportBtn" class="btn btn-ghost" data-i18n="export">Export</button>
+            <button id="importBtn" class="btn btn-ghost" data-i18n="import">Import</button>
         </div>
-        <div class="badge" id="authBadge">🔒 Не авторизован</div>
-    </div>
+        <button class="lang-btn" id="langBtn">
+            <span class="lang-flag" id="langFlag">🇷🇺</span>
+            <span class="lang-text" id="langText">RU</span>
+        </button>
+        <div class="badge" id="authBadge">
+            <span class="dot"></span>
+            <span data-i18n="locked">Locked</span>
+        </div>
+    </nav>
+
     <div class="main">
-        <div class="sidebar">
+        <aside class="sidebar">
             <div class="sidebar-header">
-                <div id="msgArea" style="font-size:12px; text-align:center; min-height:32px; padding: 8px 0;"></div>
+                <div id="msgArea" class="msg-area"></div>
                 <div class="notes-header">
-                    <h3>Все заметки</h3>
-                    <div id="newNoteBtn" class="new-btn">+</div>
+                    <h3 data-i18n="allNotes">All notes</h3>
+                    <div id="newNoteBtn" class="new-btn"></div>
                 </div>
             </div>
-            <div class="notes-list" id="notesList">🔐 Авторизуйтесь</div>
-        </div>
-        <div class="editor">
+            <div class="notes-list" id="notesList"></div>
+        </aside>
+
+        <section class="editor">
             <div class="editor-toolbar">
-                <input type="text" id="noteTitle" class="title-input" placeholder="Название заметки">
+                <input type="text" id="noteTitle" class="title-input" data-i18n-ph="untitled" placeholder="Untitled note">
                 <div class="action-buttons">
-                    <button id="emojiBtn" class="icon-btn emoji">😊 Эмодзи</button>
-                    <button id="saveBtn" class="icon-btn">💾 Сохранить</button>
-                    <button id="deleteBtn" class="icon-btn danger">🗑 Удалить</button>
+                    <button id="emojiBtn" class="icon-btn emoji">😊</button>
+                    <button id="modeToggle" class="icon-btn mode" data-i18n="edit">✏️ Edit</button>
+                    <button id="saveBtn" class="icon-btn save" data-i18n="save">💾 Save</button>
+                    <button id="deleteBtn" class="icon-btn danger">🗑</button>
                 </div>
             </div>
             <div class="content-container">
-                <textarea id="noteBody" placeholder="Напишите что-нибудь... (Markdown, ссылки)"></textarea>
+                <textarea id="noteBody" data-i18n-ph="placeholder" placeholder="Start writing..."></textarea>
                 <div id="viewer" class="viewer"></div>
             </div>
-            <div class="bottom-status" id="statusMsg">● Ничего не выбрано</div>
-        </div>
+            <div class="bottom-status" id="statusMsg">
+                <span class="status-dot"></span>
+                <span data-i18n="ready">Ready</span>
+            </div>
+        </section>
     </div>
     <div id="emojiPicker" class="emoji-picker"></div>
 </div>
 
+<div class="dialog-overlay" id="dialogOverlay">
+    <div class="dialog">
+        <h4 id="dialogTitle" data-i18n="deleteTitle">Delete note?</h4>
+        <p id="dialogMessage" data-i18n="deleteMessage">This action cannot be undone.</p>
+        <div class="dialog-actions">
+            <button class="btn btn-ghost" id="dialogCancel" data-i18n="cancel">Cancel</button>
+            <button class="btn btn-danger" id="dialogConfirm" data-i18n="delete">Delete</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // ----- Утилиты -----
-    const msgDiv = document.getElementById('msgArea');
-    const statusSpan = document.getElementById('statusMsg');
-    let msgTimeout = null;
-    function showMsg(text, isError = false, duration = 10000) {
-        if (msgTimeout) clearTimeout(msgTimeout);
-        msgDiv.textContent = text;
-        msgDiv.style.color = isError ? '#ef4444' : '#0a84ff';
-        msgDiv.style.animation = 'none';
-        setTimeout(() => msgDiv.style.animation = 'fadeIn 0.3s ease', 10);
-        msgTimeout = setTimeout(() => {
-            msgDiv.style.opacity = '0';
-            setTimeout(() => { msgDiv.textContent = ''; msgDiv.style.opacity = '1'; }, 500);
-        }, duration);
+    // ===== INTERNATIONALIZATION =====
+    const translations = {
+        en: {
+            unlock: '🔓 Unlock', signout: 'Sign out', export: 'Export', import: 'Import',
+            locked: 'Locked', userId: 'User ID', password: 'Password',
+            allNotes: 'All notes', untitled: 'Untitled note', newNote: 'New note',
+            emptyNote: 'Empty note', save: '💾 Save', signIn: 'Sign in to access your notes',
+            noNotes: 'No notes yet', createFirst: 'Tap + to create your first note',
+            justNow: 'Just now', mAgo: 'm ago', hAgo: 'h ago', dAgo: 'd ago',
+            ready: 'Ready', saving: 'Saving...', edit: '✏️ Edit', view: '👁️ View',
+            endToEnd: 'End-to-end encrypted', placeholder: 'Start writing... Supports **markdown**, *italic*, # headings, and links.',
+            selectNote: 'Select a note or create a new one', pressPlus: 'Press the + button to get started',
+            deleteTitle: 'Delete this note?', deleteMessage: 'This action cannot be undone. The note will be permanently removed.',
+            cancel: 'Cancel', delete: 'Delete', signInFirst: 'Sign in first',
+            wrongCreds: 'Wrong credentials or corrupted data', vaultUnlocked: 'Vault unlocked',
+            noteSaved: 'Note encrypted & saved', noteRemoved: 'Note removed', vaultLocked: 'Vault locked',
+            backupDownloaded: 'Encrypted backup downloaded', importFailed: 'Import failed',
+            exportFailed: 'Export failed', enterIdPass: 'Enter ID and password',
+            authFailed: 'Auth failed', loaded: 'Loaded', deleted: 'Deleted', notes: 'notes'
+        },
+        ru: {
+            unlock: '🔓 Войти', signout: 'Выйти', export: 'Экспорт', import: 'Импорт',
+            locked: 'Заблокировано', userId: 'ID пользователя', password: 'Пароль',
+            allNotes: 'Все заметки', untitled: 'Новая заметка', newNote: 'Новая заметка',
+            emptyNote: 'Пустая заметка', save: '💾 Сохранить', signIn: 'Войдите для доступа к заметкам',
+            noNotes: 'Нет заметок', createFirst: 'Нажмите + для создания первой заметки',
+            justNow: 'Только что', mAgo: ' мин назад', hAgo: ' ч назад', dAgo: ' дн назад',
+            ready: 'Готов', saving: 'Сохранение...', edit: '✏️ Изменить', view: '👁️ Просмотр',
+            endToEnd: 'Сквозное шифрование', placeholder: 'Начните писать... Поддерживается **markdown**, *курсив*, # заголовки и ссылки.',
+            selectNote: 'Выберите заметку или создайте новую', pressPlus: 'Нажмите кнопку + чтобы начать',
+            deleteTitle: 'Удалить заметку?', deleteMessage: 'Это действие нельзя отменить. Заметка будет удалена навсегда.',
+            cancel: 'Отмена', delete: 'Удалить', signInFirst: 'Сначала войдите',
+            wrongCreds: 'Неверные данные или повреждены данные', vaultUnlocked: 'Хранилище открыто',
+            noteSaved: 'Заметка зашифрована и сохранена', noteRemoved: 'Заметка удалена', vaultLocked: 'Хранилище заблокировано',
+            backupDownloaded: 'Зашифрованный бэкап скачан', importFailed: 'Ошибка импорта',
+            exportFailed: 'Ошибка экспорта', enterIdPass: 'Введите ID и пароль',
+            authFailed: 'Ошибка авторизации', loaded: 'Загружено', deleted: 'Удалено', notes: 'заметок'
+        }
+    };
+
+    let currentLang = localStorage.getItem('vc_notes_lang') || 'ru';
+
+    function t(key) {
+        return translations[currentLang][key] || translations.en[key] || key;
     }
-    function showStatus(text, duration = 3000) {
+
+    function applyLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem('vc_notes_lang', lang);
+        document.documentElement.lang = lang;
+        
+        document.getElementById('langFlag').textContent = lang === 'ru' ? '🇷🇺' : '🇺🇸';
+        document.getElementById('langText').textContent = lang.toUpperCase();
+        
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.dataset.i18n;
+            if (translations[lang][key]) {
+                el.textContent = translations[lang][key];
+            }
+        });
+        
+        document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+            const key = el.dataset.i18nPh;
+            if (translations[lang][key]) {
+                el.placeholder = translations[lang][key];
+            }
+        });
+        
+        if (modeBtn) {
+            modeBtn.textContent = isViewMode ? t('view') : t('edit');
+        }
+        
+        renderList();
+        if (isViewMode) updateViewer();
+    }
+
+    // ===== OPTIMIZED PARALLAX (THROTTLED) =====
+    let parallaxRAF = null;
+    let lastMouseX = 0, lastMouseY = 0;
+
+    document.addEventListener('mousemove', e => {
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        
+        if (!parallaxRAF) {
+            parallaxRAF = requestAnimationFrame(() => {
+                const x = (lastMouseX / window.innerWidth - 0.5) * 2;
+                const y = (lastMouseY / window.innerHeight - 0.5) * 2;
+                
+                const orb1 = document.querySelector('.bg-orb-1');
+                const orb2 = document.querySelector('.bg-orb-2');
+                
+                if (orb1) orb1.style.transform = `translate(${x * 30}px, ${y * 30}px)`;
+                if (orb2) orb2.style.transform = `translate(${-x * 20}px, ${-y * 20}px)`;
+                
+                parallaxRAF = null;
+            });
+        }
+    });
+
+    // ===== UTILITIES =====
+    const msgArea = document.getElementById('msgArea');
+    const statusMsg = document.getElementById('statusMsg');
+    let msgTimeout = null, statusTimeout = null;
+
+    function showMsg(text, type = 'info', duration = 4000) {
         if (msgTimeout) clearTimeout(msgTimeout);
-        statusSpan.textContent = text;
+        msgArea.textContent = text;
+        msgArea.className = 'msg-area show ' + type;
         msgTimeout = setTimeout(() => {
-            statusSpan.style.opacity = '0';
-            setTimeout(() => { statusSpan.textContent = '● Ничего не выбрано'; statusSpan.style.opacity = '1'; }, 500);
+            msgArea.classList.remove('show');
         }, duration);
     }
 
-    // ----- Криптография -----
+    function setStatus(text, state = 'idle', duration = 3000) {
+        if (statusTimeout) clearTimeout(statusTimeout);
+        statusMsg.className = 'bottom-status ' + state;
+        statusMsg.innerHTML = `<span class="status-dot"></span><span>${text}</span>`;
+        if (duration > 0 && state !== 'idle') {
+            statusTimeout = setTimeout(() => {
+                statusMsg.className = 'bottom-status';
+                statusMsg.innerHTML = `<span class="status-dot"></span><span>${t('ready')}</span>`;
+            }, duration);
+        }
+    }
+
+    // ===== CRYPTO =====
     async function deriveKey(pwd, salt) {
         const enc = new TextEncoder();
         const keyMat = await crypto.subtle.importKey('raw', enc.encode(pwd), 'PBKDF2', false, ['deriveKey']);
@@ -724,7 +1174,9 @@
         const key = await deriveKey(pwd, salt);
         const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plain));
         const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
-        combined.set(salt); combined.set(iv, salt.length); combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+        combined.set(salt);
+        combined.set(iv, salt.length);
+        combined.set(new Uint8Array(encrypted), salt.length + iv.length);
         return btoa(String.fromCharCode(...combined));
     }
     async function decryptData(base64, pwd) {
@@ -735,9 +1187,9 @@
         return JSON.parse(new TextDecoder().decode(dec));
     }
 
-    // ----- Хранилище -----
+    // ===== STORAGE =====
     const STORAGE_PREFIX = 'vc_notes_v4';
-    function getKey(uid) { return `${STORAGE_PREFIX}_${uid}`; }
+    const getKey = uid => `${STORAGE_PREFIX}_${uid}`;
     async function saveCollection(uid, pwd, data) {
         const enc = await encryptData(data, pwd);
         localStorage.setItem(getKey(uid), enc);
@@ -748,19 +1200,20 @@
         return await decryptData(raw, pwd);
     }
 
-    // ----- Глобальное состояние -----
+    // ===== STATE =====
     let currentUser = null, currentPass = null;
     let notes = { notes: {}, nextId: 1 };
     let currentId = null;
     let isViewMode = false;
 
-    // DOM элементы
+    // ===== DOM =====
     const userIdInp = document.getElementById('userId');
     const passInp = document.getElementById('password');
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     const exportBtn = document.getElementById('exportBtn');
     const importBtn = document.getElementById('importBtn');
+    const langBtn = document.getElementById('langBtn');
     const authBadge = document.getElementById('authBadge');
     const notesListDiv = document.getElementById('notesList');
     const newNoteBtn = document.getElementById('newNoteBtn');
@@ -771,23 +1224,26 @@
     const deleteBtn = document.getElementById('deleteBtn');
     const emojiBtn = document.getElementById('emojiBtn');
     const emojiPicker = document.getElementById('emojiPicker');
+    const modeBtn = document.getElementById('modeToggle');
 
-    // ----- Markdown -> HTML -----
+    // ===== MARKDOWN =====
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
     function mdToHtml(text) {
         if (!text) return '';
-        let html = text;
-        html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
-        html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
-        html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        html = html.replace(/__(.*?)__/g, '<u>$1</u>');
-        html = html.replace(/^- (.*$)/gm, '<li>$1</li>');
-        html = html.replace(/^\d+\. (.*$)/gm, '<li style="list-style-type:decimal;">$1</li>');
-        html = html.replace(/(<li.*<\/li>)+/g, '<ul>$&</ul>');
-        const urlRegex = /(\b(https?|ftp):\/\/[^\s<>]+|www\.[^\s<>]+\.[^\s<>]+)/gi;
+        let html = escapeHtml(text);
+        html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>');
+        html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>');
+        html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>');
+        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+        html = html.replace(/__(.+?)__/g, '<u>$1</u>');
+        html = html.replace(/^- (.*)$/gm, '<li>$1</li>');
+        html = html.replace(/(<li>.*?<\/li>(\n|$))+/g, m => `<ul>${m}</ul>`);
+        const urlRegex = /(\b(https?|ftp):\/\/[^\s<>]+|www\.[^\s<>]+)/gi;
         html = html.replace(urlRegex, url => {
-            let href = url.startsWith('www.') ? 'https://'+url : url;
+            const href = url.startsWith('www.') ? 'https://'+url : url;
             return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
         });
         html = html.replace(/\n/g, '<br>');
@@ -798,49 +1254,78 @@
         if (currentId && notes.notes[currentId]) {
             viewerDiv.innerHTML = mdToHtml(notes.notes[currentId].body || '');
         } else {
-            viewerDiv.innerHTML = '<div style="color:#737373; text-align:center; padding:40px;">Выберите заметку</div>';
+            viewerDiv.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-4);gap:12px;">
+                    <div style="font-size:64px;opacity:0.3;">📝</div>
+                    <div style="font-size:15px;font-weight:500;">${t('selectNote')}</div>
+                    <div style="font-size:12px;color:var(--text-4);">${t('pressPlus')}</div>
+                </div>`;
         }
     }
 
     function toggleMode() {
         isViewMode = !isViewMode;
-        const modeBtn = document.getElementById('modeToggle');
         if (isViewMode) {
             bodyTextarea.style.display = 'none';
             viewerDiv.style.display = 'block';
             updateViewer();
-            modeBtn.textContent = '👁️ Режим просмотра';
+            modeBtn.textContent = t('view');
         } else {
             bodyTextarea.style.display = 'block';
             viewerDiv.style.display = 'none';
-            modeBtn.textContent = '✏️ Режим редактирования';
+            modeBtn.textContent = t('edit');
         }
     }
 
-    const modeBtn = document.createElement('button');
-    modeBtn.className = 'icon-btn';
-    modeBtn.id = 'modeToggle';
-    modeBtn.textContent = '✏️ Режим редактирования';
-    document.querySelector('.editor-toolbar .action-buttons').prepend(modeBtn);
-    modeBtn.onclick = toggleMode;
+    // ===== PARTICLES =====
+    function spawnParticles(x, y, count = 12) {
+        const emojis = ['✨','⭐','💫','🌟','💎'];
+        for (let i = 0; i < count; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+            const angle = (Math.PI * 2 * i) / count;
+            const distance = 80 + Math.random() * 60;
+            p.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+            p.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+            p.style.setProperty('--r', (Math.random() * 720 - 360) + 'deg');
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 800);
+        }
+    }
 
-    // ----- Рендер списка -----
+    // ===== RENDER =====
     function renderList() {
         if (!currentUser) {
-            notesListDiv.innerHTML = '<div style="padding:32px; text-align:center; color:#737373;">🔐 Авторизуйтесь</div>';
+            notesListDiv.innerHTML = `
+                <div class="empty-state">
+                    <span class="emoji">🔐</span>
+                    <div>${t('signIn')}</div>
+                </div>`;
             return;
         }
         const items = Object.entries(notes.notes).sort((a,b) => (b[1].updatedAt||0) - (a[1].updatedAt||0));
         if (items.length === 0) {
-            notesListDiv.innerHTML = '<div style="padding:32px; text-align:center; color:#737373;">📭 Нет заметок. Нажмите +</div>';
+            notesListDiv.innerHTML = `
+                <div class="empty-state">
+                    <span class="emoji">📭</span>
+                    <div>${t('noNotes')}</div>
+                    <div style="font-size:11px;margin-top:4px;opacity:0.7;">${t('createFirst')}</div>
+                </div>`;
             return;
         }
-        notesListDiv.innerHTML = items.map(([id, note]) => `
-            <div class="note-item ${currentId == id ? 'active' : ''}" data-id="${id}">
-                <div class="note-title">${escapeHtml(note.title || 'Без названия').substring(0,40)}</div>
-                <div class="note-date">${note.updatedAt ? new Date(note.updatedAt).toLocaleString() : 'недавно'}</div>
-            </div>
-        `).join('');
+        notesListDiv.innerHTML = items.map(([id, note]) => {
+            const preview = (note.body || '').replace(/[#*_\-`]/g, '').substring(0, 80);
+            return `
+                <div class="note-item ${currentId == id ? 'active' : ''}" data-id="${id}">
+                    <div class="note-title">${escapeHtml(note.title || t('untitled')).substring(0,40)}</div>
+                    <div class="note-preview">${escapeHtml(preview) || t('emptyNote')}</div>
+                    <div class="note-date">${note.updatedAt ? formatRelative(note.updatedAt) : t('justNow')}</div>
+                </div>`;
+        }).join('');
+        
         document.querySelectorAll('.note-item').forEach(el => {
             el.addEventListener('click', () => {
                 currentId = el.dataset.id;
@@ -850,38 +1335,81 @@
         });
     }
 
+    function formatRelative(ts) {
+        const diff = Date.now() - ts;
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return t('justNow');
+        if (mins < 60) return `${mins}${t('mAgo')}`;
+        const hours = Math.floor(mins / 60);
+        if (hours < 24) return `${hours}${t('hAgo')}`;
+        const days = Math.floor(hours / 24);
+        if (days < 7) return `${days}${t('dAgo')}`;
+        return new Date(ts).toLocaleDateString(currentLang === 'ru' ? 'ru-RU' : 'en-US');
+    }
+
     function loadNoteToEditor(id) {
         const note = notes.notes[id];
         if (!note) return;
         titleInp.value = note.title || '';
         bodyTextarea.value = note.body || '';
         if (isViewMode) updateViewer();
+        setStatus(t('loaded'), 'saved', 1500);
     }
 
     async function saveCurrent() {
-        if (!currentUser) { showMsg('Авторизуйтесь', true); return; }
+        if (!currentUser) { showMsg(t('signInFirst'), 'error'); return; }
         const title = titleInp.value.trim();
         const body = bodyTextarea.value;
-        if (!title && !body) { showStatus('⚠️ Пустая заметка', 3000); return; }
+        if (!title && !body) { setStatus(t('emptyNote'), 'error', 2000); return; }
+        
+        setStatus(t('saving'), 'saving', 0);
+        
         let id = currentId;
         if (!id || !notes.notes[id]) {
             id = String(notes.nextId++);
-            notes.notes[id] = { title: title || 'Новая заметка', body, createdAt: Date.now(), updatedAt: Date.now() };
+            notes.notes[id] = { title: title || t('newNote'), body, createdAt: Date.now(), updatedAt: Date.now() };
         } else {
-            notes.notes[id].title = title || 'Без названия';
+            notes.notes[id].title = title || t('untitled');
             notes.notes[id].body = body;
             notes.notes[id].updatedAt = Date.now();
         }
         currentId = id;
+        
         await saveCollection(currentUser, currentPass, { notes: notes.notes, nextId: notes.nextId });
-        showStatus('✅ Сохранено', 2000);
+        
+        const rect = saveBtn.getBoundingClientRect();
+        spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, 10);
+        
+        setStatus(t('save') + ' ✓', 'saved', 2000);
+        showMsg('✨ ' + t('noteSaved'), 'success');
         renderList();
         if (isViewMode) updateViewer();
     }
 
+    // ===== DIALOG =====
+    const dialogOverlay = document.getElementById('dialogOverlay');
+    const dialogTitle = document.getElementById('dialogTitle');
+    const dialogMessage = document.getElementById('dialogMessage');
+    const dialogCancel = document.getElementById('dialogCancel');
+    const dialogConfirm = document.getElementById('dialogConfirm');
+    let dialogResolver = null;
+
+    function showDialog(title, message) {
+        return new Promise(resolve => {
+            dialogTitle.textContent = title;
+            dialogMessage.textContent = message;
+            dialogOverlay.classList.add('show');
+            dialogResolver = resolve;
+        });
+    }
+    dialogCancel.onclick = () => { dialogOverlay.classList.remove('show'); if (dialogResolver) dialogResolver(false); };
+    dialogConfirm.onclick = () => { dialogOverlay.classList.remove('show'); if (dialogResolver) dialogResolver(true); };
+
     async function deleteCurrent() {
         if (!currentId || !notes.notes[currentId]) return;
-        if (!confirm('Удалить заметку?')) return;
+        const confirmed = await showDialog(t('deleteTitle'), t('deleteMessage'));
+        if (!confirmed) return;
+        
         delete notes.notes[currentId];
         const ids = Object.keys(notes.notes);
         currentId = ids.length ? ids[0] : null;
@@ -889,25 +1417,27 @@
         if (currentId) loadNoteToEditor(currentId);
         else { titleInp.value = ''; bodyTextarea.value = ''; viewerDiv.innerHTML = ''; }
         renderList();
-        showStatus('🗑 Удалено', 2000);
+        setStatus(t('deleted'), 'error', 2000);
+        showMsg('🗑 ' + t('noteRemoved'), 'info');
     }
 
     async function newNote() {
-        if (!currentUser) { showMsg('Авторизуйтесь', true); return; }
+        if (!currentUser) { showMsg(t('signInFirst'), 'error'); return; }
         currentId = null;
         titleInp.value = '';
         bodyTextarea.value = '';
-        if (isViewMode) viewerDiv.innerHTML = '<div style="color:#737373; text-align:center; padding:40px;">Новая заметка</div>';
-        showStatus('✏️ Новая заметка', 2000);
+        if (isViewMode) updateViewer();
+        setStatus(t('newNote'), 'saved', 1500);
+        titleInp.focus();
     }
 
-    // ----- Эмодзи -----
-    const emojis = ['😀','😃','😄','😁','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','❤️','🧡','💛','💚','💙','💜','🖤','🤍','👍','👎','👌','✌️','🤞','🤟','🤘','👏'];
+    // ===== EMOJI =====
+    const emojis = ['😀','😃','😄','😁','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','❤️','🧡','💛','💚','💙','💜','🖤','🤍','👍','👎','👌','✌️','🤞','🤟','🤘','👏','🔥','⭐','✨','💎','🎯','🚀','💡','🎨','🎵','🌟'];
     emojiPicker.innerHTML = emojis.map(e => `<div class="emoji-item">${e}</div>`).join('');
-    function showPicker(e) {
+    function showPicker() {
         const rect = emojiBtn.getBoundingClientRect();
-        emojiPicker.style.top = rect.bottom + 8 + 'px';
-        emojiPicker.style.left = rect.left + 'px';
+        emojiPicker.style.top = (rect.bottom + 8) + 'px';
+        emojiPicker.style.left = Math.min(rect.left, window.innerWidth - 380) + 'px';
         emojiPicker.classList.toggle('show');
     }
     function insertEmoji(emoji) {
@@ -917,13 +1447,25 @@
         bodyTextarea.focus();
         emojiPicker.classList.remove('show');
     }
-    document.querySelectorAll('.emoji-item').forEach(el => el.addEventListener('click', () => insertEmoji(el.textContent)));
-    document.addEventListener('click', e => { if (!emojiPicker.contains(e.target) && e.target !== emojiBtn) emojiPicker.classList.remove('show'); });
+    emojiPicker.addEventListener('click', e => {
+        const item = e.target.closest('.emoji-item');
+        if (item) insertEmoji(item.textContent);
+    });
+    document.addEventListener('click', e => { 
+        if (!emojiPicker.contains(e.target) && e.target !== emojiBtn && !emojiBtn.contains(e.target)) {
+            emojiPicker.classList.remove('show');
+        }
+    });
 
-    // ----- Авторизация, экспорт, импорт -----
+    // ===== AUTH =====
     async function login() {
         const uid = userIdInp.value.trim(), pwd = passInp.value;
-        if (!uid || !pwd) { showMsg('Введите ID и пароль', true); return; }
+        if (!uid || !pwd) { showMsg(t('enterIdPass'), 'error'); return; }
+        
+        setStatus(t('saving'), 'saving', 0);
+        loginBtn.innerHTML = '<span class="loading-ring"></span>';
+        loginBtn.disabled = true;
+        
         try {
             const data = await loadCollection(uid, pwd);
             currentUser = uid;
@@ -931,51 +1473,68 @@
             notes = data;
             if (!notes.notes) notes.notes = {};
             if (!notes.nextId) notes.nextId = 1;
-            authBadge.textContent = `🔓 Активно: ${uid}`;
+            
+            authBadge.innerHTML = `<span class="dot"></span><span>${uid}</span>`;
+            authBadge.classList.add('active');
+            
             const ids = Object.keys(notes.notes);
             currentId = ids.length ? ids[0] : null;
             if (currentId) loadNoteToEditor(currentId);
-            else { titleInp.value = ''; bodyTextarea.value = ''; viewerDiv.innerHTML = ''; }
             renderList();
-            showMsg(`✅ Доступ открыт. Заметок: ${ids.length}`);
+            showMsg(`🔓 ${t('vaultUnlocked')} · ${ids.length} ${t('notes')}`, 'success');
+            setStatus(t('ready'), 'saved', 2000);
+            
+            const logo = document.querySelector('.logo-icon');
+            const rect = logo.getBoundingClientRect();
+            spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, 16);
         } catch(e) {
-            showMsg(`❌ Ошибка: ${e.message}`, true);
+            showMsg('❌ ' + t('wrongCreds'), 'error');
+            setStatus(t('authFailed'), 'error', 3000);
             currentUser = null; currentPass = null;
-            authBadge.textContent = '🔒 Не авторизован';
+            authBadge.innerHTML = `<span class="dot"></span><span>${t('locked')}</span>`;
+            authBadge.classList.remove('active');
             renderList();
+        } finally {
+            loginBtn.innerHTML = t('unlock');
+            loginBtn.disabled = false;
         }
     }
+    
     function logout() {
         currentUser = null; currentPass = null;
         notes = { notes: {}, nextId: 1 };
         currentId = null;
         userIdInp.value = ''; passInp.value = '';
         titleInp.value = ''; bodyTextarea.value = ''; viewerDiv.innerHTML = '';
-        authBadge.textContent = '🔒 Не авторизован';
+        authBadge.innerHTML = `<span class="dot"></span><span>${t('locked')}</span>`;
+        authBadge.classList.remove('active');
         renderList();
-        showMsg('🔓 Вы вышли');
+        showMsg('🔒 ' + t('vaultLocked'), 'info');
+        setStatus(t('ready'));
     }
+    
     async function exportBackup() {
-        if (!currentUser) { showMsg('Авторизуйтесь', true); return; }
+        if (!currentUser) { showMsg(t('signInFirst'), 'error'); return; }
         try {
             const data = await loadCollection(currentUser, currentPass);
             const backup = { version: 'vc_notes_v4', userId: currentUser, encryptedData: await encryptData(data, currentPass), exportedAt: Date.now() };
             const blob = new Blob([JSON.stringify(backup)], {type: 'application/json'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `vc_notes_${currentUser}.backup.json`;
+            a.download = `vc_notes_${currentUser}_${Date.now()}.backup.json`;
             a.click();
             URL.revokeObjectURL(a.href);
-            showMsg('✅ Бэкап создан и зашифрован');
-        } catch(e) { showMsg(`❌ Ошибка: ${e.message}`, true); }
+            showMsg('✅ ' + t('backupDownloaded'), 'success');
+        } catch(e) { showMsg(t('exportFailed') + ': ' + e.message, 'error'); }
     }
+    
     async function importBackup(file) {
         if (!file) return;
-        if (!currentUser) { showMsg('Авторизуйтесь', true); return; }
+        if (!currentUser) { showMsg(t('signInFirst'), 'error'); return; }
         try {
             const text = await file.text();
             const imported = JSON.parse(text);
-            if (imported.version !== 'vc_notes_v4' || imported.userId !== currentUser) throw new Error('Неверный формат или ID');
+            if (imported.version !== 'vc_notes_v4' || imported.userId !== currentUser) throw new Error('Wrong format or user');
             const decrypted = await decryptData(imported.encryptedData, currentPass);
             notes = decrypted;
             if (!notes.notes) notes.notes = {};
@@ -984,15 +1543,12 @@
             const ids = Object.keys(notes.notes);
             currentId = ids.length ? ids[0] : null;
             if (currentId) loadNoteToEditor(currentId);
-            else { titleInp.value = ''; bodyTextarea.value = ''; viewerDiv.innerHTML = ''; }
             renderList();
-            showMsg(`✅ Импорт: ${ids.length} заметок`);
-        } catch(e) { showMsg(`❌ Импорт: ${e.message}`, true); }
+            showMsg(`✅ Imported ${ids.length} ${t('notes')}`, 'success');
+        } catch(e) { showMsg(t('importFailed') + ': ' + e.message, 'error'); }
     }
 
-    function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
-
-    // ----- События -----
+    // ===== EVENTS =====
     loginBtn.onclick = login;
     logoutBtn.onclick = logout;
     exportBtn.onclick = exportBackup;
@@ -1001,11 +1557,30 @@
     saveBtn.onclick = saveCurrent;
     deleteBtn.onclick = deleteCurrent;
     emojiBtn.onclick = showPicker;
+    modeBtn.onclick = toggleMode;
     
+    langBtn.onclick = () => {
+        const newLang = currentLang === 'ru' ? 'en' : 'ru';
+        applyLanguage(newLang);
+        showMsg(newLang === 'ru' ? '🇷🇺 Русский язык активирован' : '🇺🇸 English language activated', 'info');
+    };
+
+    passInp.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+    userIdInp.addEventListener('keydown', e => { if (e.key === 'Enter') passInp.focus(); });
+    
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            saveCurrent();
+        }
+    });
+
+    // ===== INIT =====
     bodyTextarea.style.display = 'block';
     viewerDiv.style.display = 'none';
     isViewMode = false;
-    modeBtn.textContent = '✏️ Режим редактирования';
+    applyLanguage(currentLang);
+    setStatus(t('ready'));
     renderList();
 </script>
 </body>
