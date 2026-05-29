@@ -1590,11 +1590,14 @@ function updateAllHints() {
   if (langBtn) langBtn.title = `${t('toggleLang')} (${formatShortcut('mod+shift+l')})`;
 }
 
-/* ===== MESH BACKGROUND ===== */
+/* ===== MESH BACKGROUND — OPTIMIZED ===== */
 const meshCanvas = document.getElementById('meshCanvas');
 const meshCtx = meshCanvas.getContext('2d', { alpha: true });
-let meshW, meshH, meshPoints = [], meshCols = 8, meshRows = 6;
+let meshW, meshH, meshPoints = [];
+let meshCols = 8, meshRows = 6;      // ▲ 1: уменьшили сетку (было 14x10)
 let meshRAF = null, meshActive = true;
+let lastFrameTime = 0;
+const FPS_LIMIT = 30;                // ▲ 3: ограничили частоту кадров
 
 function resizeMesh() {
   const scale = 0.4;
@@ -1621,24 +1624,33 @@ function initMeshPoints() {
   }
 }
 
-function drawMesh(time) {
+function drawMesh(now) {
   if (!meshActive) return;
+  
+  // ▲ 3: ограничение FPS
+  if (now - lastFrameTime < 1000 / FPS_LIMIT) {
+    meshRAF = requestAnimationFrame(drawMesh);
+    return;
+  }
+  lastFrameTime = now;
+  
   meshCtx.clearRect(0, 0, meshW, meshH);
-  const t = time * 0.0004;
+  const t = now * 0.0004;
   
   for (let i = 0; i < meshPoints.length; i++) {
     const p = meshPoints[i];
     const x = p.baseX + Math.sin(t * p.speed + p.ox) * p.amplitude;
     const y = p.baseY + Math.cos(t * p.speed * 0.7 + p.oy) * p.amplitude;
     
-    const gradient = meshCtx.createRadialGradient(x, y, 0, x, y, 80);
+    // ▲ 2: уменьшили радиус градиента и размер заливки
+    const gradient = meshCtx.createRadialGradient(x, y, 0, x, y, 40);
     const hue = 210 + Math.sin(i * 0.5 + t * 0.2) * 20;
     gradient.addColorStop(0, `hsla(${hue}, 100%, 55%, 0.18)`);
     gradient.addColorStop(0.5, `hsla(${hue + 30}, 80%, 50%, 0.08)`);
     gradient.addColorStop(1, 'transparent');
     
     meshCtx.fillStyle = gradient;
-    meshCtx.fillRect(x - 80, y - 80, 160, 160);
+    meshCtx.fillRect(x - 40, y - 40, 80, 80);   // ▲ 2: вместо 160x160
   }
   
   meshRAF = requestAnimationFrame(drawMesh);
@@ -2343,9 +2355,7 @@ function openHelp() {
   if (helpOpen) return;
   helpOpen = true;
   
-  // Build keyboard hint helper
   const kbd = (keys) => {
-    // keys is array: ['mod', 'shift', 'n'] or ['?']
     return keys.map(k => {
       if (k === 'mod') return `<kbd>${modSymbol}</kbd>`;
       if (k === 'shift') return `<kbd>${shiftSymbol}</kbd>`;
@@ -2469,9 +2479,7 @@ document.addEventListener('keydown', e => {
   const mod = isMod(e);
   const key = e.key.toLowerCase();
   
-  // ========== GLOBAL SHORTCUTS (work even in inputs) ==========
-  
-  // Cmd/Ctrl + K → Command Palette
+  // Command palette
   if (mod && !e.shiftKey && key === 'k') {
     e.preventDefault();
     if (paletteOpen) closePalette();
@@ -2480,7 +2488,7 @@ document.addEventListener('keydown', e => {
     return;
   }
   
-  // Cmd/Ctrl + S → Save (always works)
+  // Save
   if (mod && !e.shiftKey && key === 's') {
     e.preventDefault();
     saveCurrent();
@@ -2488,7 +2496,7 @@ document.addEventListener('keydown', e => {
     return;
   }
   
-  // Cmd/Ctrl + Shift + N → New Note (safe, doesn't conflict with browser)
+  // New note
   if (mod && e.shiftKey && key === 'n') {
     e.preventDefault();
     newNote();
@@ -2496,7 +2504,7 @@ document.addEventListener('keydown', e => {
     return;
   }
   
-  // Cmd/Ctrl + Shift + L → Toggle Language (safe)
+  // Toggle language
   if (mod && e.shiftKey && key === 'l') {
     e.preventDefault();
     langBtn.click();
@@ -2504,7 +2512,7 @@ document.addEventListener('keydown', e => {
     return;
   }
   
-  // Cmd/Ctrl + E → Export (usually safe)
+  // Export
   if (mod && !e.shiftKey && key === 'e') {
     e.preventDefault();
     exportBackup();
@@ -2512,14 +2520,14 @@ document.addEventListener('keydown', e => {
     return;
   }
   
-  // Cmd/Ctrl + D → Delete
+  // Delete
   if (mod && !e.shiftKey && key === 'd') {
     e.preventDefault();
     deleteCurrent();
     return;
   }
   
-  // ========== ESCAPE HANDLERS ==========
+  // Escape handling
   if (e.key === 'Escape') {
     if (paletteOpen) { closePalette(); e.preventDefault(); return; }
     if (helpOpen) { closeHelp(); e.preventDefault(); return; }
@@ -2533,7 +2541,7 @@ document.addEventListener('keydown', e => {
     return;
   }
   
-  // ========== PALETTE NAVIGATION ==========
+  // Palette navigation
   if (paletteOpen) {
     if (e.key === 'ArrowDown') {
       paletteSelectedIndex = (paletteSelectedIndex + 1) % paletteFiltered.length;
@@ -2555,7 +2563,7 @@ document.addEventListener('keydown', e => {
     return;
   }
   
-  // ========== HELP SHORTCUT ==========
+  // Help
   if (e.key === '?' || (e.shiftKey && e.key === '/')) {
     if (!isInputFocused()) {
       e.preventDefault();
@@ -2565,7 +2573,7 @@ document.addEventListener('keydown', e => {
     }
   }
   
-  // ========== TEXT-ONLY SHORTCUTS (not in inputs) ==========
+  // Text‑only shortcuts
   if (isInputFocused()) return;
   
   if (key === 'j') { navigateNotes(1); e.preventDefault(); return; }
