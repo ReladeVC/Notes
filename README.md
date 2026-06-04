@@ -3,12 +3,12 @@
 # 🐻 MD Notes
 
 ### End-to-end encrypted, zero-dependency markdown notebook that runs entirely in your browser.
-
-
+[🚀 Start MD Notes](https://reladevc.github.io/Notes/) • [Download](#quick-start) • 
+![MD Notes feature map](assets/art.png)
 [![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen.svg)](#)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
-![MD Notes feature map](assets/art.png)
-[🚀 Start MD Notes](https://reladevc.github.io/Notes/) • [Download](#quick-start) • 
+
+
 
 </div>
 
