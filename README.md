@@ -1,14 +1,13 @@
 <div align="center">
 
 # 🐻 MD Notes
-![MD Notes feature map](assets/art.png)
+
 ### End-to-end encrypted, zero-dependency markdown notebook that runs entirely in your browser.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen.svg)](#)
-[![Dependencies](https://img.shields.io/badge/Dependencies-None-lightgrey.svg)](#)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
+[![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen.svg)](#)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
+![MD Notes feature map](assets/art.png)
 [🚀 Start MD Notes](https://reladevc.github.io/Notes/) • [Download](#quick-start) • [Shortcuts](#-keyboard-shortcuts) • [Architecture](#️-technical-stack)
 
 </div>
