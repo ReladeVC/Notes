@@ -9,7 +9,7 @@
 [![Dependencies](https://img.shields.io/badge/Dependencies-None-lightgrey.svg)](#)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
-[Live Demo](#) • [Download](#quick-start) • [Shortcuts](#-keyboard-shortcuts) • [Architecture](#️-technical-stack)
+[🚀 Start MD Notes](https://reladevc.github.io/Notes/) • [Download](#quick-start) • [Shortcuts](#-keyboard-shortcuts) • [Architecture](#️-technical-stack)
 
 </div>
 
@@ -50,13 +50,16 @@
 
 ## 🚀 Quick Start
 
-### Option 1: Direct Download
+### Option 1: Live Version
+👉 **[Start MD Notes](https://reladevc.github.io/Notes/)** — instant access, no installation needed.
+
+### Option 2: Direct Download
 1. Download `index.html` + `icon.ico` from [Releases](../../releases)
 2. Open in any modern browser
 3. Create credentials (stored locally in `localStorage`)
 
-### Option 2: Clone & Run
+### Option 3: Clone & Run
 ```bash
-git clone https://github.com/yourusername/md-notes.git
-cd md-notes
+git clone https://github.com/reladevc/Notes.git
+cd Notes
 # Open index.html in your browser — no build step needed
