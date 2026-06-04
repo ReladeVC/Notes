@@ -1,25 +1,62 @@
-🐻 MD Notes
-End-to-end encrypted, zero-dependency markdown notebook that runs entirely in your browser.
-MD Notes is a secure, high-performance note-taking application designed with a "privacy-first" architecture. No servers, no tracking, no build steps. Just a single HTML file that keeps your thoughts safe and accessible.
-✨ Key Features
-🔒 Military-Grade Security
-AES-256-GCM Encryption: All notes are encrypted locally before being saved
-PBKDF2 Key Derivation: 210,000 iterations with SHA-256 for brute-force resistance
-Zero-Knowledge Architecture: Your password never leaves your device; decryption happens entirely in-browser
-Atomic Writes: Temp-file strategy prevents data corruption during saves
-⚡ Blazing Performance
-Optimized Canvas Rendering: Mesh background runs at ≤24 FPS with automatic idle detection (drops to ~8 FPS when inactive)
-Throttled Interactions: Mouse spotlight effects limited to 60ms intervals to prevent layout thrashing
-GPU-Accelerated CSS: contain: strict, translateZ(0), and reduced blur radii for smooth 60fps UI
-Respects prefers-reduced-motion: Automatically disables animations for accessibility
-📝 Modern Editor Experience
-Auto-Save: Debounced saving (1.8s) with visual status indicators
-Markdown Support: Headings, bold, italic, lists, links, and underline
-Dual Mode: Seamless toggle between Edit and Preview modes
-Emoji Picker: Built-in emoji selector with cursor-aware insertion
-Command Palette: Ctrl+K / ⌘K for keyboard-driven navigation
-🛠️ Developer-Friendly Architecture
-Schema Versioning: Automatic data migrations ensure forward compatibility
-Bilingual UI: Full English/Russian localization with instant switching
-Portable Backup: Export/import encrypted JSON backups
-Single-File Deployment: No build tools, no npm, no server required
+<div align="center">
+
+# 🐻 MD Notes
+
+### End-to-end encrypted, zero-dependency markdown notebook that runs entirely in your browser.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen.svg)](#)
+[![Dependencies](https://img.shields.io/badge/Dependencies-None-lightgrey.svg)](#)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
+
+[Live Demo](#) • [Download](#quick-start) • [Shortcuts](#-keyboard-shortcuts) • [Architecture](#️-technical-stack)
+
+</div>
+
+---
+
+## 📖 About
+
+**MD Notes** is a secure, high-performance note-taking application designed with a **privacy-first** architecture. No servers, no tracking, no build steps, no frameworks. Just a single HTML file that keeps your thoughts safe, fast, and accessible anywhere.
+
+> ⚠️ **Zero-Knowledge:** Your password never leaves your device. All encryption and decryption happen exclusively in your browser using the Web Crypto API.
+
+## ✨ Key Features
+
+### 🔒 Military-Grade Security
+- **AES-256-GCM Encryption** — authenticated encryption for all stored data
+- **PBKDF2 Key Derivation** — 210,000 iterations with SHA-256
+- **Atomic Writes** — temp-file strategy prevents data corruption on save
+- **Unsaved Changes Guard** — `beforeunload` warning protects against accidental tab closure
+
+### ⚡ Blazing Performance
+- **Optimized Canvas Mesh** — ≤24 FPS with automatic idle detection (drops to ~8 FPS)
+- **Throttled Interactions** — mouse spotlight limited to 60ms to prevent layout thrashing
+- **GPU-Accelerated CSS** — `contain: strict`, `translateZ(0)`, reduced blur radii
+- **Accessibility First** — full `prefers-reduced-motion` support
+
+### 📝 Modern Editor
+- **Auto-Save** — debounced 1.8s saving with visual status indicators
+- **Markdown Rendering** — headings, bold, italic, lists, links, underline
+- **Dual Mode** — seamless Edit ↔ Preview toggle
+- **Emoji Picker** — built-in selector with cursor-aware insertion
+- **Command Palette** — `Ctrl+K` / `⌘K` keyboard-driven navigation
+- **Schema Versioning** — automatic data migrations for forward compatibility
+
+### 🌍 Bilingual & Portable
+- Full **English / Russian** UI with instant switching
+- Encrypted **JSON backup** export/import
+- **Single-file deployment** — no npm, no bundler, no server
+
+## 🚀 Quick Start
+
+### Option 1: Direct Download
+1. Download `index.html` + `icon.ico` from [Releases](../../releases)
+2. Open in any modern browser
+3. Create credentials (stored locally in `localStorage`)
+
+### Option 2: Clone & Run
+```bash
+git clone https://github.com/yourusername/md-notes.git
+cd md-notes
+# Open index.html in your browser — no build step needed
