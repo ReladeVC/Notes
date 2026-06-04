@@ -54,8 +54,3 @@
 
 
 
-### Option 3: Clone & Run
-```bash
-git clone https://github.com/reladevc/Notes.git
-cd Notes
-# Open index.html in your browser — no build step needed
