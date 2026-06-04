@@ -49,13 +49,10 @@
 
 ## 🚀 Quick Start
 
-### Option 1: Live Version
+ Live Version
 👉 **[Start MD Notes](https://reladevc.github.io/Notes/)** — instant access, no installation needed.
 
-### Option 2: Direct Download
-1. Download `index.html` + `icon.ico` from [Releases](../../releases)
-2. Open in any modern browser
-3. Create credentials (stored locally in `localStorage`)
+
 
 ### Option 3: Clone & Run
 ```bash
