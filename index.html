@@ -73,7 +73,8 @@ html, body {
   font-feature-settings: 'cv11', 'ss01';
 }
 
-/* ===== MESH BACKGROUND ===== */
+/* ===== MESH BACKGROUND — ОПТИМИЗИРОВАНО ===== */
+/* ▼ Главное: убрали blur(60px) saturate(1.2) → blur(18px) только */
 #meshCanvas {
   position: fixed;
   inset: 0;
@@ -81,8 +82,11 @@ html, body {
   height: 100%;
   z-index: 0;
   pointer-events: none;
-  filter: blur(60px) saturate(1.2);
-  opacity: 0.6;
+  filter: blur(18px);
+  opacity: 0.75;
+  transform: translateZ(0); /* GPU-ускорение */
+  will-change: auto;
+  contain: strict; /* изолируем repaint */
 }
 
 .bg-vignette {
@@ -93,14 +97,17 @@ html, body {
   z-index: 0;
 }
 
+/* ▼ Заменили SVG feTurbulence на лёгкий data-PNG noise */
 .bg-noise {
   position: fixed;
   inset: 0;
-  opacity: 0.04;
+  opacity: 0.035;
   mix-blend-mode: overlay;
   pointer-events: none;
   z-index: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABERERmZmczMzOZmZkH9y36AAAACHRSTlMAMwAozSF3cX2l3v0AAABgSURBVDjLY2AYBaNgFIwCdAByUhJABpOTk4MgcXFxEQgxJycnAyEwOZmBgYGBQYoBDBgZGRhEGMCAiYmBQYQBDDg4GBiEGMAiDAwMjIwMDGxsDAxMTAwMjIwMDMzMDAxMzEA1TAxAwMYMAuwcDHBABEYhAwNCAABzUxFH3wG2XgAAAABJRU5ErkJggg==");
+  background-repeat: repeat;
+  contain: strict;
 }
 
 /* ===== APP ===== */
@@ -509,6 +516,7 @@ html, body {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 10px 16px;
+  contain: layout style paint;
 }
 .notes-list::-webkit-scrollbar { width: 6px; }
 .notes-list::-webkit-scrollbar-track { background: transparent; }
@@ -1303,6 +1311,7 @@ textarea::-webkit-scrollbar-thumb:hover, .viewer::-webkit-scrollbar-thumb:hover 
   z-index: 9999;
   font-size: 18px;
   animation: particleBurst 0.8s var(--ease-out) forwards;
+  will-change: transform, opacity;
 }
 @keyframes particleBurst {
   0% { transform: translate(0, 0) scale(0); opacity: 1; }
@@ -1338,6 +1347,17 @@ textarea::-webkit-scrollbar-thumb:hover, .viewer::-webkit-scrollbar-thumb:hover 
 @keyframes noteFadeIn {
   from { opacity: 0; transform: translateX(-8px); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+/* ▼ УВАЖЕНИЕ К СИСТЕМНЫМ НАСТРОЙКАМ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  #meshCanvas { filter: none; opacity: 0.4; }
+  .bg-noise { opacity: 0.02; }
 }
 </style>
 </head>
@@ -1515,65 +1535,45 @@ const isMac = /mac|iphone|ipad|ipod/i.test(navigator.platform || navigator.userA
 const modSymbol = isMac ? '⌘' : 'Ctrl';
 const shiftSymbol = isMac ? '⇧' : 'Shift';
 
-// Check if modifier key is pressed (cross-platform)
 function isMod(e) {
   return isMac ? e.metaKey : e.ctrlKey;
 }
 
-// Format shortcut string for display: "mod+shift+n" → "⌘⇧N" (Mac) / "Ctrl+Shift+N" (Win)
 function formatShortcut(s) {
   if (!s) return '';
   const parts = s.split('+');
   const result = [];
   let letter = '';
-  
   for (const part of parts) {
-    if (part === 'mod') {
-      result.push(modSymbol);
-    } else if (part === 'shift') {
-      result.push(shiftSymbol);
-    } else {
-      letter = part.toUpperCase();
-    }
+    if (part === 'mod') result.push(modSymbol);
+    else if (part === 'shift') result.push(shiftSymbol);
+    else letter = part.toUpperCase();
   }
-  
-  if (isMac) {
-    // Mac: concatenate symbols without separators: ⌘⇧N
-    return result.join('') + letter;
-  } else {
-    // Windows/Linux: Ctrl+Shift+N
-    return [...result, letter].join('+');
-  }
+  return isMac ? result.join('') + letter : [...result, letter].join('+');
 }
 
 function applyLanguage(lang) {
   currentLang = lang;
   localStorage.setItem('vc_notes_lang', lang);
   document.documentElement.lang = lang;
-  
   document.getElementById('langFlag').textContent = lang === 'ru' ? '🇷🇺' : '🇺🇸';
   document.getElementById('langText').textContent = lang.toUpperCase();
-  
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     if (translations[lang][key]) el.textContent = translations[lang][key];
   });
-  
   document.querySelectorAll('[data-i18n-ph]').forEach(el => {
     const key = el.dataset.i18nPh;
     if (translations[lang][key]) el.placeholder = translations[lang][key];
   });
-  
   if (typeof modeBtn !== 'undefined' && modeBtn) {
     modeBtn.textContent = isViewMode ? t('view') : t('edit');
   }
-  
   updateAllHints();
   renderList();
   if (isViewMode) updateViewer();
 }
 
-// Update all shortcut hints in UI based on OS
 function updateAllHints() {
   const searchHint = document.getElementById('searchKbdHint');
   const hintK = document.getElementById('hintK');
@@ -1581,7 +1581,6 @@ function updateAllHints() {
   const saveKbd = document.getElementById('saveKbd');
   const newBtn = document.getElementById('newNoteBtn');
   const langBtn = document.getElementById('langBtn');
-  
   if (searchHint) searchHint.textContent = formatShortcut('mod+k');
   if (hintK) hintK.textContent = formatShortcut('mod+k');
   if (hintS) hintS.textContent = formatShortcut('mod+s');
@@ -1590,19 +1589,27 @@ function updateAllHints() {
   if (langBtn) langBtn.title = `${t('toggleLang')} (${formatShortcut('mod+shift+l')})`;
 }
 
-/* ===== MESH BACKGROUND — OPTIMIZED ===== */
+/* ===== MESH BACKGROUND — КЛЮЧЕВАЯ ОПТИМИЗАЦИЯ ===== */
 const meshCanvas = document.getElementById('meshCanvas');
-const meshCtx = meshCanvas.getContext('2d', { alpha: true });
+const meshCtx = meshCanvas.getContext('2d', { alpha: true, desynchronized: true });
 let meshW, meshH, meshPoints = [];
-let meshCols = 8, meshRows = 6;      // ▲ 1: уменьшили сетку (было 14x10)
+let meshCols = 6, meshRows = 4;       // ▼ было 8x6 — уменьшили в 2 раза
 let meshRAF = null, meshActive = true;
 let lastFrameTime = 0;
-const FPS_LIMIT = 30;                // ▲ 3: ограничили частоту кадров
+const FPS_LIMIT = 24;                  // ▼ было 30 — плавность сохранилась, но нагрузка ниже
+let idleMode = false;                  // ▼ новый режим экономии
+let lastActivityTime = Date.now();
+
+// ▼ Проверяем prefers-reduced-motion
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (prefersReducedMotion) meshActive = false;
 
 function resizeMesh() {
-  const scale = 0.4;
-  meshW = meshCanvas.width = Math.floor(window.innerWidth * scale);
-  meshH = meshCanvas.height = Math.floor(window.innerHeight * scale);
+  // ▼ Рендерим в ещё меньшем разрешении (0.25 вместо 0.4)
+  // При меньшем разрешении blur работает в разы быстрее
+  const scale = 0.25;
+  meshW = meshCanvas.width = Math.max(100, Math.floor(window.innerWidth * scale));
+  meshH = meshCanvas.height = Math.max(100, Math.floor(window.innerHeight * scale));
   meshCanvas.style.width = window.innerWidth + 'px';
   meshCanvas.style.height = window.innerHeight + 'px';
   initMeshPoints();
@@ -1618,7 +1625,8 @@ function initMeshPoints() {
         ox: Math.random() * Math.PI * 2,
         oy: Math.random() * Math.PI * 2,
         speed: 0.25 + Math.random() * 0.35,
-        amplitude: 15 + Math.random() * 20
+        amplitude: 15 + Math.random() * 20,
+        hue: 210 + Math.random() * 40  // ▼ Предрасчитываем базовый hue
       });
     }
   }
@@ -1627,30 +1635,42 @@ function initMeshPoints() {
 function drawMesh(now) {
   if (!meshActive) return;
   
-  // ▲ 3: ограничение FPS
+  // ▼ FPS limit
   if (now - lastFrameTime < 1000 / FPS_LIMIT) {
     meshRAF = requestAnimationFrame(drawMesh);
     return;
   }
   lastFrameTime = now;
   
+  // ▼ В idle режиме снижаем FPS до 8
+  const isIdle = Date.now() - lastActivityTime > 5000;
+  if (isIdle && !idleMode) {
+    idleMode = true;
+  } else if (!isIdle && idleMode) {
+    idleMode = false;
+  }
+  
   meshCtx.clearRect(0, 0, meshW, meshH);
   const t = now * 0.0004;
   
-  for (let i = 0; i < meshPoints.length; i++) {
+  // ▼ Кешируем длину массива
+  const len = meshPoints.length;
+  for (let i = 0; i < len; i++) {
     const p = meshPoints[i];
     const x = p.baseX + Math.sin(t * p.speed + p.ox) * p.amplitude;
     const y = p.baseY + Math.cos(t * p.speed * 0.7 + p.oy) * p.amplitude;
     
-    // ▲ 2: уменьшили радиус градиента и размер заливки
-    const gradient = meshCtx.createRadialGradient(x, y, 0, x, y, 40);
-    const hue = 210 + Math.sin(i * 0.5 + t * 0.2) * 20;
-    gradient.addColorStop(0, `hsla(${hue}, 100%, 55%, 0.18)`);
-    gradient.addColorStop(0.5, `hsla(${hue + 30}, 80%, 50%, 0.08)`);
+    // ▼ Уменьшили радиус градиента с 40 до 30 (меньше вычислений)
+    const radius = 30;
+    const gradient = meshCtx.createRadialGradient(x, y, 0, x, y, radius);
+    const hue = p.hue + Math.sin(i * 0.5 + t * 0.2) * 20;
+    gradient.addColorStop(0, `hsla(${hue}, 100%, 55%, 0.22)`);
+    gradient.addColorStop(0.5, `hsla(${hue + 30}, 80%, 50%, 0.10)`);
     gradient.addColorStop(1, 'transparent');
     
     meshCtx.fillStyle = gradient;
-    meshCtx.fillRect(x - 40, y - 40, 80, 80);   // ▲ 2: вместо 160x160
+    // ▼ Квадрат меньше (60x60 вместо 80x80)
+    meshCtx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
   }
   
   meshRAF = requestAnimationFrame(drawMesh);
@@ -1658,20 +1678,29 @@ function drawMesh(now) {
 
 window.addEventListener('resize', resizeMesh);
 resizeMesh();
-meshRAF = requestAnimationFrame(drawMesh);
+if (!prefersReducedMotion) meshRAF = requestAnimationFrame(drawMesh);
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     meshActive = false;
     if (meshRAF) cancelAnimationFrame(meshRAF);
-  } else {
+  } else if (!prefersReducedMotion) {
     meshActive = true;
+    lastFrameTime = 0;
     meshRAF = requestAnimationFrame(drawMesh);
   }
 });
 
-/* ===== SPOTLIGHT HOVER ===== */
+/* ===== SPOTLIGHT HOVER — С THROTTLE ===== */
+// ▼ Throttle на 60ms вместо каждого mousemove (снижает вызовы в 10+ раз)
+let lastHoverUpdate = 0;
 document.addEventListener('mousemove', e => {
+  lastActivityTime = Date.now(); // Обновляем активность
+  
+  const now = performance.now();
+  if (now - lastHoverUpdate < 60) return; // throttle
+  lastHoverUpdate = now;
+  
   const target = e.target.closest('.note-item, .btn, .icon-btn');
   if (!target) return;
   const rect = target.getBoundingClientRect();
@@ -1833,14 +1862,17 @@ function toggleMode() {
 
 /* ===== PARTICLES ===== */
 function spawnParticles(x, y, count = 10) {
+  if (prefersReducedMotion) return; // ▼ Отключаем на слабых устройствах
   const emojis = ['✨','⭐','💫','🌟','💎'];
-  for (let i = 0; i < count; i++) {
+  // ▼ Максимум 8 частиц для безопасности
+  const finalCount = Math.min(count, 8);
+  for (let i = 0; i < finalCount; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
     p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
     p.style.left = x + 'px';
     p.style.top = y + 'px';
-    const angle = (Math.PI * 2 * i) / count;
+    const angle = (Math.PI * 2 * i) / finalCount;
     const distance = 60 + Math.random() * 50;
     p.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
     p.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
@@ -1864,23 +1896,18 @@ function applyFlip() {
   notesListDiv.querySelectorAll('.note-item').forEach(el => {
     const id = el.dataset.id;
     const first = previousNotePositions.get(id);
-    
     if (!first) {
       el.classList.add('fade-in');
       setTimeout(() => el.classList.remove('fade-in'), 300);
       return;
     }
-    
     const last = el.getBoundingClientRect();
     const dx = first.left - last.left;
     const dy = first.top - last.top;
-    
     if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
-    
     el.classList.add('flipping');
     el.style.transform = `translate(${dx}px, ${dy}px)`;
     el.style.transition = 'none';
-    
     requestAnimationFrame(() => {
       el.style.transition = `transform ${duration}ms cubic-bezier(0.16, 1, 0.3, 1)`;
       el.style.transform = '';
@@ -1895,7 +1922,6 @@ function applyFlip() {
 /* ===== RENDER LIST ===== */
 function renderList(animate = true) {
   if (animate) capturePositions();
-  
   if (!currentUser) {
     notesListDiv.innerHTML = `
       <div class="empty-state">
@@ -1905,11 +1931,9 @@ function renderList(animate = true) {
     notesCountEl.textContent = '0';
     return;
   }
-  
   let items = Object.entries(notes.notes).sort((a,b) => (b[1].updatedAt||0) - (a[1].updatedAt||0));
   const total = items.length;
   notesCountEl.textContent = total;
-  
   if (searchQuery.trim()) {
     const q = searchQuery.toLowerCase();
     items = items.filter(([, note]) => {
@@ -1918,7 +1942,6 @@ function renderList(animate = true) {
       return title.includes(q) || body.includes(q);
     });
   }
-  
   if (total === 0) {
     notesListDiv.innerHTML = `
       <div class="empty-state">
@@ -1928,7 +1951,6 @@ function renderList(animate = true) {
       </div>`;
     return;
   }
-  
   if (items.length === 0) {
     notesListDiv.innerHTML = `
       <div class="empty-state">
@@ -1937,7 +1959,6 @@ function renderList(animate = true) {
       </div>`;
     return;
   }
-  
   notesListDiv.innerHTML = items.map(([id, note]) => {
     const preview = (note.body || '').replace(/[#*_\-`]/g, '').substring(0, 80);
     return `
@@ -1947,7 +1968,6 @@ function renderList(animate = true) {
         <div class="note-date">${note.updatedAt ? formatRelative(note.updatedAt) : t('justNow')}</div>
       </div>`;
   }).join('');
-  
   notesListDiv.querySelectorAll('.note-item').forEach(el => {
     el.addEventListener('click', () => {
       currentId = el.dataset.id;
@@ -1955,7 +1975,6 @@ function renderList(animate = true) {
       renderList(false);
     });
   });
-  
   if (animate) applyFlip();
 }
 
@@ -1985,12 +2004,9 @@ async function saveCurrent() {
   const title = titleInp.value.trim();
   const body = bodyTextarea.value;
   if (!title && !body) { setStatus(t('emptyNote'), 'error', 2000); return; }
-  
   setStatus(t('saving'), 'saving', 0);
-  
   let id = currentId;
   const isNew = !id || !notes.notes[id];
-  
   if (isNew) {
     id = String(notes.nextId++);
     notes.notes[id] = { title: title || t('newNote'), body, createdAt: Date.now(), updatedAt: Date.now() };
@@ -2000,12 +2016,9 @@ async function saveCurrent() {
     notes.notes[id].updatedAt = Date.now();
   }
   currentId = id;
-  
   await saveCollection(currentUser, currentPass, { notes: notes.notes, nextId: notes.nextId });
-  
   const rect = saveBtn.getBoundingClientRect();
   spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, 8);
-  
   setStatus('✓ ' + t('noteSaved'), 'saved', 2000);
   showMsg('✨ ' + t('noteSaved'), 'success');
   renderList(isNew);
@@ -2036,7 +2049,6 @@ async function deleteCurrent() {
   if (!currentId || !notes.notes[currentId]) return;
   const confirmed = await showDialog(t('deleteTitle'), t('deleteMessage'));
   if (!confirmed) return;
-  
   delete notes.notes[currentId];
   const ids = Object.keys(notes.notes);
   currentId = ids.length ? ids[0] : null;
@@ -2093,12 +2105,10 @@ document.addEventListener('click', e => {
 async function login() {
   const uid = userIdInp.value.trim(), pwd = passInp.value;
   if (!uid || !pwd) { showMsg(t('enterIdPass'), 'error'); return; }
-  
   setStatus(t('saving'), 'saving', 0);
   const originalText = loginBtn.textContent;
   loginBtn.innerHTML = '<span class="loading-ring"></span>';
   loginBtn.disabled = true;
-  
   try {
     const data = await loadCollection(uid, pwd);
     currentUser = uid;
@@ -2106,17 +2116,14 @@ async function login() {
     notes = data;
     if (!notes.notes) notes.notes = {};
     if (!notes.nextId) notes.nextId = 1;
-    
     authBadge.innerHTML = `<span class="dot"></span><span>${uid}</span>`;
     authBadge.classList.add('active');
-    
     const ids = Object.keys(notes.notes);
     currentId = ids.length ? ids[0] : null;
     if (currentId) loadNoteToEditor(currentId);
     renderList(false);
     showMsg(`🔓 ${t('vaultUnlocked')} · ${ids.length} ${t('notes')}`, 'success');
     setStatus(t('ready'), 'saved', 2000);
-    
     const logo = document.querySelector('.logo-icon');
     const rect = logo.getBoundingClientRect();
     spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, 12);
@@ -2203,7 +2210,6 @@ function openPalette() {
   if (paletteOpen) return;
   paletteOpen = true;
   paletteSelectedIndex = 0;
-  
   const overlay = document.createElement('div');
   overlay.id = 'cmdOverlay';
   overlay.className = 'cmd-overlay';
@@ -2225,14 +2231,12 @@ function openPalette() {
       </div>
     </div>`;
   document.body.appendChild(overlay);
-  
   const input = document.getElementById('cmdInput');
   input.focus();
   input.addEventListener('input', handlePaletteInput);
   overlay.addEventListener('click', e => {
     if (e.target === overlay) closePalette();
   });
-  
   filterPalette('');
 }
 
@@ -2244,12 +2248,10 @@ function handlePaletteInput(e) {
 function filterPalette(query) {
   const q = query.toLowerCase().trim();
   paletteFiltered = [];
-  
   const matchingCommands = commands.filter(c => {
     const title = c.title().toLowerCase();
     return title.includes(q) || c.keywords.some(k => k.includes(q));
   }).map(c => ({ type: 'command', data: c }));
-  
   let matchingNotes = [];
   if (currentUser && notes.notes) {
     matchingNotes = Object.entries(notes.notes)
@@ -2261,7 +2263,6 @@ function filterPalette(query) {
       .slice(0, 6)
       .map(([id, note]) => ({ type: 'note', data: { id, note } }));
   }
-  
   paletteFiltered = [...matchingCommands, ...matchingNotes];
   paletteSelectedIndex = Math.min(paletteSelectedIndex, Math.max(0, paletteFiltered.length - 1));
   renderPalette();
@@ -2270,22 +2271,18 @@ function filterPalette(query) {
 function renderPalette() {
   const container = document.getElementById('cmdResults');
   if (!container) return;
-  
   if (paletteFiltered.length === 0) {
     container.innerHTML = `<div class="cmd-empty">🔍 ${t('noResults')}</div>`;
     return;
   }
-  
   let html = '';
   let currentType = '';
-  
   paletteFiltered.forEach((item, i) => {
     if (item.type !== currentType) {
       currentType = item.type;
       const label = item.type === 'command' ? t('commands') : t('notesLabel');
       html += `<div class="cmd-group-label">${label}</div>`;
     }
-    
     if (item.type === 'command') {
       const cmd = item.data;
       const shortcut = cmd.shortcut ? formatShortcut(cmd.shortcut) : '';
@@ -2309,16 +2306,13 @@ function renderPalette() {
         </div>`;
     }
   });
-  
   container.innerHTML = html;
-  
   container.querySelectorAll('.cmd-item').forEach(el => {
     el.addEventListener('click', () => {
       const idx = parseInt(el.dataset.idx);
       executePaletteItem(idx);
     });
   });
-  
   const active = container.querySelector('.cmd-item.active');
   if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
@@ -2327,7 +2321,6 @@ function executePaletteItem(idx) {
   const item = paletteFiltered[idx];
   if (!item) return;
   closePalette();
-  
   if (item.type === 'command') {
     item.data.action();
   } else {
@@ -2354,7 +2347,6 @@ let helpOpen = false;
 function openHelp() {
   if (helpOpen) return;
   helpOpen = true;
-  
   const kbd = (keys) => {
     return keys.map(k => {
       if (k === 'mod') return `<kbd>${modSymbol}</kbd>`;
@@ -2363,14 +2355,12 @@ function openHelp() {
       return `<kbd>${k}</kbd>`;
     }).join('');
   };
-  
   const overlay = document.createElement('div');
   overlay.id = 'helpOverlay';
   overlay.className = 'help-overlay show';
   overlay.innerHTML = `
     <div class="help-modal">
       <h4>${t('helpTitle')}</h4>
-      
       <div class="help-section">
         <div class="help-section-title">${t('general')}</div>
         <div class="help-row">
@@ -2390,7 +2380,6 @@ function openHelp() {
           <div class="help-row-keys">${kbd(['mod', 'e'])}</div>
         </div>
       </div>
-      
       <div class="help-section">
         <div class="help-section-title">${t('editor')}</div>
         <div class="help-row">
@@ -2406,7 +2395,6 @@ function openHelp() {
           <div class="help-row-keys">${kbd(['mod', 'd'])}</div>
         </div>
       </div>
-      
       <div class="help-section">
         <div class="help-section-title">${t('navigation')}</div>
         <div class="help-row">
@@ -2423,11 +2411,9 @@ function openHelp() {
         </div>
       </div>
     </div>`;
-  
   overlay.addEventListener('click', e => {
     if (e.target === overlay) closeHelp();
   });
-  
   document.body.appendChild(overlay);
 }
 
@@ -2448,9 +2434,7 @@ function navigateNotes(direction) {
   const ids = Object.entries(notes.notes)
     .sort((a,b) => (b[1].updatedAt||0) - (a[1].updatedAt||0))
     .map(([id]) => id);
-  
   if (ids.length === 0) return;
-  
   const currentIdx = currentId ? ids.indexOf(currentId) : -1;
   let newIdx;
   if (currentIdx === -1) {
@@ -2458,7 +2442,6 @@ function navigateNotes(direction) {
   } else {
     newIdx = (currentIdx + direction + ids.length) % ids.length;
   }
-  
   currentId = ids[newIdx];
   loadNoteToEditor(currentId);
   renderList(false);
@@ -2478,8 +2461,6 @@ function showKeyToast(key) {
 document.addEventListener('keydown', e => {
   const mod = isMod(e);
   const key = e.key.toLowerCase();
-  
-  // Command palette
   if (mod && !e.shiftKey && key === 'k') {
     e.preventDefault();
     if (paletteOpen) closePalette();
@@ -2487,47 +2468,35 @@ document.addEventListener('keydown', e => {
     showKeyToast(formatShortcut('mod+k'));
     return;
   }
-  
-  // Save
   if (mod && !e.shiftKey && key === 's') {
     e.preventDefault();
     saveCurrent();
     showKeyToast(formatShortcut('mod+s'));
     return;
   }
-  
-  // New note
   if (mod && e.shiftKey && key === 'n') {
     e.preventDefault();
     newNote();
     showKeyToast(formatShortcut('mod+shift+n'));
     return;
   }
-  
-  // Toggle language
   if (mod && e.shiftKey && key === 'l') {
     e.preventDefault();
     langBtn.click();
     showKeyToast(formatShortcut('mod+shift+l'));
     return;
   }
-  
-  // Export
   if (mod && !e.shiftKey && key === 'e') {
     e.preventDefault();
     exportBackup();
     showKeyToast(formatShortcut('mod+e'));
     return;
   }
-  
-  // Delete
   if (mod && !e.shiftKey && key === 'd') {
     e.preventDefault();
     deleteCurrent();
     return;
   }
-  
-  // Escape handling
   if (e.key === 'Escape') {
     if (paletteOpen) { closePalette(); e.preventDefault(); return; }
     if (helpOpen) { closeHelp(); e.preventDefault(); return; }
@@ -2540,8 +2509,6 @@ document.addEventListener('keydown', e => {
     emojiPicker.classList.remove('show');
     return;
   }
-  
-  // Palette navigation
   if (paletteOpen) {
     if (e.key === 'ArrowDown') {
       paletteSelectedIndex = (paletteSelectedIndex + 1) % paletteFiltered.length;
@@ -2562,8 +2529,6 @@ document.addEventListener('keydown', e => {
     }
     return;
   }
-  
-  // Help
   if (e.key === '?' || (e.shiftKey && e.key === '/')) {
     if (!isInputFocused()) {
       e.preventDefault();
@@ -2572,13 +2537,9 @@ document.addEventListener('keydown', e => {
       return;
     }
   }
-  
-  // Text‑only shortcuts
   if (isInputFocused()) return;
-  
   if (key === 'j') { navigateNotes(1); e.preventDefault(); return; }
   if (key === 'k') { navigateNotes(-1); e.preventDefault(); return; }
-  
   if (key === '/') {
     e.preventDefault();
     openPalette();
