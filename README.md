@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🐻 MD Notes
-
+(assets/art.png)
 ### End-to-end encrypted, zero-dependency markdown notebook that runs entirely in your browser.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
