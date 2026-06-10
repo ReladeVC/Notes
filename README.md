@@ -3,7 +3,6 @@
 > **Портативный зашифрованный блокнот** для Windows (7, 10, 11) и других ОС.  
 > Работает из коробки: **заметки онлайн** (браузерная версия) и **локальные заметки для рабочего стола Windows** с автоматическим шифрованием.
 
-### End-to-end encrypted, zero-dependency markdown notebook that runs entirely in your browser.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tech](https://img.shields.io/badge/AES--256-Encrypted-red)]()
@@ -13,9 +12,9 @@
 
 ---
 
-## 🚀 Try it now
+## 🚀 Запуск
 
-| Version | Link | Best for |
+| Версия | Ссылки | Описание |
 |---------|------|----------|
 | 🌐 **Browser** | [🚀 Start MD Notes](https://reladevc.github.io/Notes/) | **заметки онлайн** — работайте из любой точки мира |
 | 💾 **Portable (exe)** | [⬇️ Скачать md-notes.portable.exe](https://github.com/ReladeVC/Notes/releases/download/notes/md-notes.portable.exe) | **заметки для рабочего стола windows** — один файл, без установки |
