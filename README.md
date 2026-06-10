@@ -21,7 +21,7 @@
 | 🌐 **Browser** | [🚀 Start MD Notes](https://reladevc.github.io/Notes/) | **заметки онлайн** — работайте из любой точки мира |
 | 💾 **Portable (exe)** | [⬇️ Скачать md-notes.portable.exe](https://github.com/ReladeVC/Notes/releases/download/notes/md-notes.portable.exe) | **заметки для рабочего стола windows** — один файл, без установки |
 | 📦 **Installer (x64)** | [⬇️ Скачать MD.Notes_1.0.0_x64-setup.exe](https://github.com/ReladeVC/Notes/releases/download/notes/MD.Notes_1.0.0_x64-setup.exe) | **приложения для заметок windows** — классическая установка в AppData |
-| 📱 **PWA** | [➕ Установить из браузера](#pwa-installation) | **заметки для windows 10/11** — работает как родное приложение |
+
 
 ---
 
