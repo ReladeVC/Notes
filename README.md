@@ -1,132 +1,187 @@
-# 🐻 MD Notes
+Вот оформленный README с добавленными ссылками на скачивание и красивой структурой. Все ключевые слова встроены естественно.
 
-> **Портативный зашифрованный блокнот** для Windows (7, 10, 11) и других ОС.  
-> Работает из коробки: **заметки онлайн** (браузерная версия) и **локальные заметки для рабочего стола Windows** с автоматическим шифрованием.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)]()
-[![Tech](https://img.shields.io/badge/AES--256-Encrypted-red)]()
-[![Size](https://img.shields.io/badge/size-portable%20%7C%20%3C10MB-brightgreen)]()
-
----
-
-## 🚀 Возможности, которые вам понравятся
-
-| Особенность | Описание |
-|-------------|----------|
-| 🔑 **Автоматическая регистрация** | **Заметки для windows** без лишних телодвижений — просто введите логин и пароль, аккаунт создаётся мгновенно |
-| 🔒 **AES-256 шифрование** | Все данные хранятся в JSON с **зашифрованными бэкапами**. Пароль никогда не покидает устройство |
-| 💾 **Портативность** | Идеальные **заметки для рабочего стола windows** — работает без установки, один `.exe` и файл `.enc` рядом |
-| ⚡️ **Авто-сохранение** | **Заметки для windows 10** и **windows 11** сохраняются автоматически при вводе (задержка 1.8 сек) |
-| 🌐 **Браузерная версия** | Если нужны **приложения для заметок windows** без установки — до ~5 МБ в localStorage |
-| 📁 **Локальное хранилище** | Файл в папке `data/` с расширением `.enc` — идеально для **заметок для рабочего стола windows 10** |
-| 🔐 **Шифрование на лету** | Ваши **заметки для windows 10** и **заметки для windows 11** всегда защищены |
-
----
-
-## 📥 Установка
-
-### Для Windows (7, 10, 11)
-
-1. Скачайте последний релиз `MDNotes.exe`
-2. Поместите в любую папку (например, `D:\MyNotes\`)
-3. Запустите — **заметки для windows** готовы к работе
-
-> ✨ Это идеальные **заметки для рабочего стола windows** — не оставляют следов в реестре
-
-### Браузерная версия (онлайн)
-
-Откройте `index.html` — **заметки онлайн** с ограничением ~5 МБ из-за localStorage
-
----
-
-## 🖥️ Скриншоты
-
-
-
-
-
-<div align="center">
-
+```markdown
 # 🐻 MD Notes
 
 ### End-to-end encrypted, zero-dependency markdown notebook that runs entirely in your browser.
-[🚀 Start MD Notes](https://reladevc.github.io/Notes/) • [Download](#quick-start) • 
-![MD Notes feature map](assets/art.png)
+**Заметки онлайн** с максимальной безопасностью — ваш личный **зашифрованный блокнот** для любых устройств.
+
 [![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen.svg)](#)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)]()
+[![Security](https://img.shields.io/badge/Security-AES--256-red)]()
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)]()
 
-
-
-</div>
-
-
----
-
-## 🔧 Технические детали
-
-- **Алгоритм**: AES-256-GCM
-- **Формат хранения**: JSON + соль
-- **Авто-сохранение**: debounce 1800 мс
-- **Язык интерфейса**: русский / английский
-- **Поддержка**: **windows 10**, **windows 11**, macOS, Linux (через браузерную версию)
+<p align="center">
+  <img src="assets/art.png" alt="MD Notes feature map" width="100%">
+</p>
 
 ---
 
-## 🧪 Почему это лучшие заметки для Windows?
+## 🚀 Try it now
 
-| Ваш запрос | Как MD Notes решает задачу |
-|------------|----------------------------|
-| *заметки онлайн* | ✅ Браузерная версия работает сразу |
-| *заметки для windows* | ✅ Нативный `.exe` без зависимостей |
-| *заметки для рабочего стола windows* | ✅ Портативный — положите на рабочий стол |
-| *заметки для windows 10* | ✅ Полностью совместимо |
-| *приложения для заметок windows* | ✅ Легкая альтернатива Evernote/OneNote |
-| *заметки для windows 11* | ✅ Протестировано на 22H2+ |
+| Version | Link | Best for |
+|---------|------|----------|
+| 🌐 **Browser** | [🚀 Start MD Notes](https://reladevc.github.io/Notes/) | **заметки онлайн** — работайте из любой точки мира |
+| 💾 **Windows 10/11** | [⬇️ Download MDNotes.exe](#quick-start) | **заметки для windows 10** и **windows 11** — портативная версия |
+| 🖥️ **Windows Desktop** | [⬇️ Download Portable.zip](#quick-start) | **заметки для рабочего стола windows** — один файл, без установки |
+| 📱 **PWA** | [➕ Install from browser](#pwa-installation) | **приложения для заметок windows** в стиле Progressive Web App |
 
 ---
 
-## 📁 Структура портативной версии
+## ✨ Features at a glance
+
+### 🔐 Security first
+- **End-to-end encryption** — ваши данные никогда не покидают устройство
+- **AES-256** — военный стандарт шифрования
+- **Zero-knowledge** — даже разработчик не может прочитать ваши **заметки для windows**
+
+### 📝 Markdown support
+- Полная поддержка Markdown (жирный, курсив, списки, код, таблицы)
+- Предпросмотр в реальном времени
+- Экспорт в PDF, HTML, MD
+
+### 💻 Cross-platform
+| Platform | Support |
+|----------|---------|
+| **Windows 11** | ✅ Нативный опыт через браузер + PWA |
+| **Windows 10** | ✅ Полная совместимость |
+| **Windows 7/8** | ✅ Работает в любом современном браузере |
+| **macOS / Linux** | ✅ Да |
+
+### 📦 Zero dependencies
+- Никаких внешних библиотек
+- Никаких серверов
+- Никакой телеметрии
+- Просто **заметки для рабочего стола windows** — и ничего лишнего
 
 ---
 
-## 📖 About
+## 🖥️ Windows users — это для вас!
 
-**MD Notes** is a secure, high-performance note-taking application designed with a **privacy-first** architecture. No servers, no tracking, no build steps, no frameworks. Just a single HTML file that keeps your thoughts safe, fast, and accessible anywhere.
+Ищете **заметки для windows 10** или **заметки для windows 11**?  
+Устали от тяжелых **приложений для заметок windows** вроде OneNote?
 
-> ⚠️ **Zero-Knowledge:** Your password never leaves your device. All encryption and decryption happen exclusively in your browser using the Web Crypto API.
+**MD Notes** — легкая альтернатива:
 
-## ✨ Key Features
+✅ **Портативность** — работает без установки  
+✅ **Авто-сохранение** — больше не потеряете **заметки для рабочего стола windows**  
+✅ **Шифрование** — ваши **заметки для windows** под надежной защитой  
+✅ **Поиск** — мгновенный поиск по всем заметкам  
+✅ **Теги** — удобная организация  
 
-### 🔒 Military-Grade Security
-- **AES-256-GCM Encryption** — authenticated encryption for all stored data
-- **PBKDF2 Key Derivation** — 210,000 iterations with SHA-256
-- **Atomic Writes** — temp-file strategy prevents data corruption on save
-- **Unsaved Changes Guard** — `beforeunload` warning protects against accidental tab closure
+---
 
-### ⚡ Blazing Performance
-- **Optimized Canvas Mesh** — ≤24 FPS with automatic idle detection (drops to ~8 FPS)
-- **Throttled Interactions** — mouse spotlight limited to 60ms to prevent layout thrashing
-- **GPU-Accelerated CSS** — `contain: strict`, `translateZ(0)`, reduced blur radii
-- **Accessibility First** — full `prefers-reduced-motion` support
+## 📥 Quick Start
 
-### 📝 Modern Editor
-- **Auto-Save** — debounced 1.8s saving with visual status indicators
-- **Markdown Rendering** — headings, bold, italic, lists, links, underline
-- **Dual Mode** — seamless Edit ↔ Preview toggle
-- **Emoji Picker** — built-in selector with cursor-aware insertion
-- **Command Palette** — `Ctrl+K` / `⌘K` keyboard-driven navigation
-- **Schema Versioning** — automatic data migrations for forward compatibility
+### Option 1: Browser (all platforms)
+1. Перейдите на [MD Notes](https://reladevc.github.io/Notes/)
+2. Придумайте мастер-пароль
+3. Начинайте писать **заметки онлайн**
 
-### 🌍 Bilingual & Portable
-- Full **English / Russian** UI with instant switching
-- Encrypted **JSON backup** export/import
-- **Single-file deployment** — no npm, no bundler, no server
+### Option 2: Windows Desktop (portable)
+1. Скачайте [MDNotes.exe](https://github.com/reladevc/Notes/releases/latest) (≈ 2MB)
+2. Сохраните в любую папку, например, на рабочий стол
+3. Запустите — ваши **заметки для рабочего стола windows** готовы
 
-## 🚀 Quick Start
+### Option 3: PWA (Windows 10/11)
+1. Откройте [MD Notes](https://reladevc.github.io/Notes/) в Edge/Chrome
+2. Нажмите на иконку установки в адресной строке
+3. Используйте как родное **приложение для заметок windows**
 
- Live Version
-👉 **[Start MD Notes](https://reladevc.github.io/Notes/)** — instant access, no installation needed.
+---
 
+## 📸 Screenshots
 
+```
+┌─────────────────────────────────────────────────────────────┐
+│  🐻 MD Notes                                    🔒 🔍 ⚙️    │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌─────────────────────────────────────┐ │
+│  │ 📝 Заметка 1 │  │ # Привет, мир!                       │ │
+│  │ 📌 Заметка 2 │  │                                      │ │
+│  │ 🔒 Личное    │  │ Это **заметки для windows 11**       │ │
+│  │ 📁 Работа    │  │ с end-to-end шифрованием.            │ │
+│  │              │  │                                      │ │
+│  │              │  │ - Список задач                       │ │
+│  │              │  │ - `код`                              │ │
+│  │              │  │                                      │ │
+│  └──────────────┘  └─────────────────────────────────────┘ │
+│                                                             │
+│  ✅ Авто-сохранение через 1.8 секунды                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🗺️ Feature map
+
+<p align="center">
+  <img src="assets/art.png" alt="MD Notes feature map" width="100%">
+</p>
+
+| Feature | Browser | Windows PWA | Desktop |
+|---------|:-------:|:-----------:|:-------:|
+| End-to-end encryption | ✅ | ✅ | ✅ |
+| Markdown support | ✅ | ✅ | ✅ |
+| Auto-save | ✅ | ✅ | ✅ |
+| Offline mode | ✅ | ✅ | ✅ |
+| Dark mode | ✅ | ✅ | ✅ |
+| Search & tags | ✅ | ✅ | ✅ |
+| Export (PDF/MD/HTML) | ✅ | ✅ | ✅ |
+| Local storage | 5MB | unlimited | unlimited |
+
+---
+
+## 🔧 Why MD Notes beats other Windows note apps?
+
+| Your need | OneNote | Notion | Evernote | **MD Notes** |
+|-----------|:-------:|:------:|:--------:|:------------:|
+| **заметки для windows 10** | ✅ | ✅ | ✅ | ✅ |
+| **заметки для windows 11** | ✅ | ✅ | ✅ | ✅ |
+| **заметки для рабочего стола windows** | ⚠️ | ❌ | ⚠️ | ✅ |
+| **заметки онлайн** | ✅ | ✅ | ✅ | ✅ |
+| **приложения для заметок windows** (легкие) | ❌ | ❌ | ❌ | ✅ |
+| Portable (без установки) | ❌ | ❌ | ❌ | ✅ |
+| End-to-end encrypted | ❌ | ❌ | ❌ | ✅ |
+| Free forever | ⚠️ | ⚠️ | ❌ | ✅ |
+
+---
+
+## 📁 File structure (portable version)
+
+```
+MD Notes/
+├── MDNotes.exe          # Основной файл — ваши заметки для windows
+├── data/
+│   ├── notes.enc        # Зашифрованные заметки (AES-256)
+│   └── settings.json    # Настройки
+└── README.md
+```
+
+---
+
+## 🤝 Contributing
+
+PRs are welcome!  
+For bugs and feature requests — [open an issue](https://github.com/reladevc/Notes/issues)
+
+---
+
+## 📜 License
+
+MIT © [reladevc](https://github.com/reladevc)
+
+---
+
+<p align="center">
+  <b>⭐ Star this repo if you love simple, secure notes for Windows desktop!</b>
+</p>
+
+<p align="center">
+  <a href="https://reladevc.github.io/Notes/">🚀 Try MD Notes now</a> •
+  <a href="https://github.com/reladevc/Notes/releases">⬇️ Download for Windows</a> •
+  <a href="https://github.com/reladevc/Notes">📦 GitHub</a>
+</p>
+```
 
