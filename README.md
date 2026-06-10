@@ -19,9 +19,9 @@
 | Version | Link | Best for |
 |---------|------|----------|
 | 🌐 **Browser** | [🚀 Start MD Notes](https://reladevc.github.io/Notes/) | **заметки онлайн** — работайте из любой точки мира |
-| 💾 **Windows 10/11** | [⬇️ Download MDNotes.exe](#quick-start) | **заметки для windows 10** и **windows 11** — портативная версия |
-| 🖥️ **Windows Desktop** | [⬇️ Download Portable.zip](#quick-start) | **заметки для рабочего стола windows** — один файл, без установки |
-| 📱 **PWA** | [➕ Install from browser](#pwa-installation) | **приложения для заметок windows** в стиле Progressive Web App |
+| 💾 **Portable (exe)** | [⬇️ Скачать md-notes.portable.exe](https://github.com/ReladeVC/Notes/releases/download/notes/md-notes.portable.exe) | **заметки для рабочего стола windows** — один файл, без установки |
+| 📦 **Installer (x64)** | [⬇️ Скачать MD.Notes_1.0.0_x64-setup.exe](https://github.com/ReladeVC/Notes/releases/download/notes/MD.Notes_1.0.0_x64-setup.exe) | **приложения для заметок windows** — классическая установка в AppData |
+| 📱 **PWA** | [➕ Установить из браузера](#pwa-installation) | **заметки для windows 10/11** — работает как родное приложение |
 
 ---
 
@@ -73,23 +73,45 @@
 
 ## 📥 Установка
 
-### Для Windows (7, 10, 11)
+### 🔹 Вариант 1: Портативная версия (рекомендуется для USB-флешек)
 
-1. Скачайте последний релиз `MDNotes.exe` из [раздела релизов](https://github.com/reladevc/Notes/releases)
-2. Поместите в любую папку (например, на рабочий стол или `D:\MyNotes\`)
-3. Запустите — **заметки для windows** готовы к работе
+**Скачать:** [md-notes.portable.exe](https://github.com/ReladeVC/Notes/releases/download/notes/md-notes.portable.exe)
 
-> ✨ Это идеальные **заметки для рабочего стола windows** — не оставляют следов в реестре
+1. Скачайте файл `md-notes.portable.exe`
+2. Поместите в любую папку (рабочий стол, `D:\MyNotes\`, флешку)
+3. Запустите — **заметки для рабочего стола windows** готовы
 
-### Браузерная версия (онлайн)
+> ✨ **Идеально для:** работы без установки, хранения на флешке, переноса между компьютерами.  
+> Файл `data/` с заметками создаётся рядом с `.exe`.
 
-1. Перейдите на [MD Notes](https://reladevc.github.io/Notes/)
+---
+
+### 🔹 Вариант 2: Классический установщик
+
+**Скачать:** [MD.Notes_1.0.0_x64-setup.exe](https://github.com/ReladeVC/Notes/releases/download/notes/MD.Notes_1.0.0_x64-setup.exe)
+
+1. Скачайте установщик
+2. Запустите и следуйте инструкциям
+3. Приложение установится в `%AppData%\MD Notes`
+4. Ярлык появится в меню "Пуск"
+
+> ✨ **Идеально для:** постоянного использования, автоматических обновлений, чистого интерфейса установленного **приложения для заметок windows**.
+
+---
+
+### 🔹 Вариант 3: Браузерная версия (онлайн)
+
+**Открыть:** [https://reladevc.github.io/Notes/](https://reladevc.github.io/Notes/)
+
+1. Перейдите по ссылке
 2. Придумайте мастер-пароль
 3. Начинайте писать **заметки онлайн**
 
 > ⚠️ Ограничение ~5 МБ из-за localStorage браузера
 
-### PWA (для Windows 10/11)
+---
+
+### 🔹 Вариант 4: PWA (для Windows 10/11)
 
 1. Откройте [MD Notes](https://reladevc.github.io/Notes/) в Edge или Chrome
 2. Нажмите на иконку установки в адресной строке
