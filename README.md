@@ -6,11 +6,10 @@
 ### End-to-end encrypted, zero-dependency markdown notebook that runs entirely in your browser.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/platform-Windows)]()
 [![Tech](https://img.shields.io/badge/AES--256-Encrypted-red)]()
 [![Size](https://img.shields.io/badge/size-portable%20%7C%20%3C10MB-brightgreen)]()
 [![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen.svg)]()
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)]()
+
 
 ---
 
