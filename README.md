@@ -1,25 +1,10 @@
-# 🐻 (MD) Notes (RU/ENG) SUPPORT ⭐⭐⭐⭐⭐
-
-> **Портативный зашифрованный блокнот** для Windows (7, 10, 11) и других ОС.  
-> Работает из коробки: **заметки онлайн** (браузерная версия) и **локальные заметки для рабочего стола Windows** с автоматическим шифрованием.
-
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tech](https://img.shields.io/badge/AES--256-Encrypted-red)]()
-[![Size](https://img.shields.io/badge/size-portable%20%7C%20%3C10MB-brightgreen)]()
-[![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen.svg)]()
-
-
----
-
 ## 🚀 Запуск
 
 | Версия | Ссылки | Описание |
 |---------|------|----------|
 | 🌐 **Browser** | [🚀 Start MD Notes](https://reladevc.github.io/Notes/) | **заметки онлайн** — работайте из любой точки мира |
-| 💾 **Portable (exe)** | [⬇️ Скачать md-notes.portable.exe](https://github.com/ReladeVC/Notes/releases/download/notes/md-notes.portable.exe) | **заметки для рабочего стола windows** — один файл, без установки |
-| 📦 **Installer (x64)** | [⬇️ Скачать MD.Notes_1.0.0_x64-setup.exe](https://github.com/ReladeVC/Notes/releases/download/notes/MD.Notes_1.0.0_x64-setup.exe) | **приложения для заметок windows** — классическая установка в AppData |
-
+| 💾 **Portable (exe)** | [⬇️ Скачать md-notes.exe](https://github.com/ReladeVC/Notes/releases/download/notes/md-notes.exe) | **заметки для рабочего стола windows** — один файл, без установки, **менее 15 МБ** |
+| 📦 **Installer (x64)** | [⬇️ Скачать MD.Notes_7.0.0_x64_en-US.msi](https://github.com/ReladeVC/Notes/releases/download/notes/MD.Notes_7.0.0_x64_en-US.msi) | **приложения для заметок windows** — классическая установка, **легковесный MSI-пакет (< 15 МБ)** |
 
 ---
 
@@ -29,7 +14,7 @@
 |-------------|----------|
 | 🔑 **Автоматическая регистрация** | **Заметки для windows** без лишних телодвижений — просто введите логин и пароль, аккаунт создаётся мгновенно |
 | 🔒 **AES-256 шифрование** | Все данные хранятся в JSON с **зашифрованными бэкапами**. Пароль никогда не покидает устройство |
-| 💾 **Портативность** | Идеальные **заметки для рабочего стола windows** — работает без установки, один `.exe` и файл `.enc` рядом |
+| 💾 **Портативность** | Идеальные **заметки для рабочего стола windows** — работает без установки, один `.exe` и файл `.enc` рядом, **размер exe менее 15 МБ** |
 | ⚡️ **Авто-сохранение** | **Заметки для windows 10** и **windows 11** сохраняются автоматически при вводе (задержка 1.8 сек) |
 | 🌐 **Браузерная версия** | Если нужны **приложения для заметок windows** без установки — до ~5 МБ в localStorage |
 | 📁 **Локальное хранилище** | Файл в папке `data/` с расширением `.enc` — идеально для **заметок для рабочего стола windows 10** |
@@ -37,8 +22,6 @@
 | 📝 **Markdown поддержка** | Полная поддержка Markdown (жирный, курсив, списки, код, таблицы) с предпросмотром |
 
 ---
-
-
 
 
 
@@ -62,9 +45,9 @@
 
 ### 🔹 Вариант 1: Портативная версия (рекомендуется для USB-флешек)
 
-**Скачать:** [md-notes.portable.exe](https://github.com/ReladeVC/Notes/releases/download/notes/md-notes.portable.exe)
+**Скачать:** [md-notes.exe](https://github.com/ReladeVC/Notes/releases/download/notes/md-notes.exe) — **размер менее 15 МБ**
 
-1. Скачайте файл `md-notes.portable.exe`
+1. Скачайте файл `md-notes.exe`
 2. Поместите в любую папку (рабочий стол, `D:\MyNotes\`, флешку)
 3. Запустите — **заметки для рабочего стола windows** готовы
 
@@ -75,7 +58,7 @@
 
 ### 🔹 Вариант 2: Классический установщик
 
-**Скачать:** [MD.Notes_1.0.0_x64-setup.exe](https://github.com/ReladeVC/Notes/releases/download/notes/MD.Notes_1.0.0_x64-setup.exe)
+**Скачать:** [MD.Notes_7.0.0_x64_en-US.msi](https://github.com/ReladeVC/Notes/releases/download/notes/MD.Notes_7.0.0_x64_en-US.msi) — **легковесный MSI-пакет (< 15 МБ)**
 
 1. Скачайте установщик
 2. Запустите и следуйте инструкциям
@@ -95,7 +78,3 @@
 3. Начинайте писать **заметки онлайн**
 
 > ⚠️ Ограничение ~5 МБ из-за localStorage браузера
-
----
-
-
