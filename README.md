@@ -1,4 +1,4 @@
-# 🐻 (MD) Notes (RU/ENG) SUPPORT ⭐⭐⭐⭐⭐
+# 🐻 (MD) Notes (ENG/RU) SUPPORT ⭐⭐⭐⭐⭐
 
 > **Portable encrypted notebook** for Windows (7, 10, 11) and other OS.  
 > Works out of the box: **online notes** (browser version) and **local notes for Windows desktop** with automatic encryption.
